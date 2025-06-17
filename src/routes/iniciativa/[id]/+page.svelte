@@ -1,4 +1,6 @@
 <script lang="ts">
+	import DocumentCard from './DocumentCard.svelte';
+
 	import {
 		Card,
 		CardContent,
@@ -55,9 +57,9 @@
 
 <!-- Main Content -->
 <main class="container mx-auto px-4 py-8">
-	<div class="max-w-4xl mx-auto">
+	<div class="max-w-4xl mx-auto flex flex-col gap-6">
 		<!-- Breadcrumb -->
-		<nav class="mb-6">
+		<nav>
 			<ol class="flex items-center space-x-2 text-sm text-gray-500">
 				<li><a href="/" class="hover:text-blue-600">Iniciativas</a></li>
 				<li class="before:content-['/'] before:mx-2">
@@ -70,7 +72,7 @@
 		</nav>
 
 		<!-- Main Initiative Card -->
-		<Card class="mb-8">
+		<Card>
 			<CardHeader>
 				<div class="flex items-start justify-between">
 					<div class="flex-1">
@@ -159,10 +161,14 @@
 				</div>
 			</CardContent>
 		</Card>
+		<!-- Documents -->
+		{#if initiative.documents && initiative.documents.length > 0}
+			<DocumentCard initiative={initiative} ></DocumentCard>
+		{/if}
 
 		<!-- Voting Results -->
 		{#if initiative.votes && initiative.votes.length > 0 && voteResults}
-			<Card class="mb-8">
+			<Card>
 				<CardHeader>
 					<CardTitle>Resultados da Votação</CardTitle>
 					<CardDescription>
@@ -246,42 +252,5 @@
 			</Card>
 		{/if}
 
-		<!-- Documents -->
-		{#if initiative.documents && initiative.documents.length > 0}
-			<Card>
-				<CardHeader>
-					<CardTitle>Documentos Anexos</CardTitle>
-					<CardDescription>
-						Documentos relacionados com esta iniciativa
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div class="space-y-3">
-						{#each initiative.documents as doc (doc.id)}
-							<div
-								class="flex items-center justify-between p-3 border rounded-lg"
-							>
-								<div class="flex items-center space-x-3">
-									<div
-										class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center"
-									>
-										📄
-									</div>
-									<div>
-										<div class="font-medium">{doc.original_filename}</div>
-										<div class="text-sm text-gray-500">
-											{Math.round(doc.file_size / 1024)} KB • {formatDate(
-												doc.uploaded_at,
-											)}
-										</div>
-									</div>
-								</div>
-								<Button variant="outline" size="sm">Descarregar</Button>
-							</div>
-						{/each}
-					</div>
-				</CardContent>
-			</Card>
-		{/if}
 	</div>
 </main>

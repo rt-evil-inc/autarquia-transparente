@@ -8,7 +8,7 @@
 	import * as Select from '$lib/components/ui/select/index.js';
 	import type { Tag } from '$lib/server/database';
 	import type { FullInitiativeResponse } from '../../routes/api/initiatives/[id]/+server';
-	import EditInitiativeVotes from './VoteEditor.svelte';
+	import VoteEditor from './VoteEditor.svelte';
 
 	let { initiative, tags }:{initiative?: FullInitiativeResponse, tags: Tag[] } = $props();
 
@@ -483,9 +483,7 @@
 					</div>
 
 					<!-- Votes Section (Edit Mode) -->
-					{#if isEditMode}
-						<EditInitiativeVotes bind:votes={votes} {saving} />
-					{/if}
+					<VoteEditor bind:votes={votes} {saving} />
 
 					<!-- Actions -->
 					<div class="flex justify-between pt-6">
