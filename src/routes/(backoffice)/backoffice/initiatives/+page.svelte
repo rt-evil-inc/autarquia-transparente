@@ -24,7 +24,8 @@
 		return matchesSearch && matchesStatus && matchesCategory;
 	}));
 
-	function formatDate(dateStr: string|Date) {
+	function formatDate(dateStr: string | Date | null) {
+		if (!dateStr) return 'N/A';
 		return new Date(dateStr).toLocaleDateString('pt-PT');
 	}
 
@@ -70,16 +71,18 @@
 				<CardContent class="pt-6">
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Pesquisar</label>
+							<label for="search-input" class="block text-sm font-medium text-gray-700 mb-2">Pesquisar</label>
 							<Input
+								id="search-input"
 								bind:value={searchTerm}
 								placeholder="Pesquisar por título ou descrição..."
 							/>
 						</div>
 
 						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+							<label for="status-filter" class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
 							<select
+								id="status-filter"
 								bind:value={statusFilter}
 								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
 							>
@@ -92,8 +95,9 @@
 						</div>
 
 						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+							<label for="category-filter" class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
 							<select
+								id="category-filter"
 								bind:value={categoryFilter}
 								class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
 							>

@@ -2,189 +2,39 @@ import { Database } from 'bun:sqlite';
 import bcrypt from 'bcrypt';
 import fs from 'fs';
 import { drizzle } from 'drizzle-orm/bun-sqlite';
+import { eq, and, like, or, desc } from 'drizzle-orm';
+import {
+  parishes,
+  users,
+  tags,
+  initiatives,
+  initiative_documents,
+  initiative_tags,
+  votes,
+  // Import types from schema
+  type User,
+  type Parish,
+  type Tag,
+  type InitiativeDocument,
+  type Vote,
+} from '../../db/schema.js';
 
 // Initialize database with strict mode
 export const db = new Database('portal-autarca.db');
-
-export const drizzleDb = drizzle(process.env.DB_FILE_NAME!);
+export const drizzleDb = drizzle(db);
 
 // Enable foreign keys
 db.exec('PRAGMA foreign_keys = ON');
 
-export type User = {
-  id: number;
-  email: string;
-  password_hash: string; // Optional for non-authenticated users
-  role: 'admin' | 'parish';
-  parish_id?: number; // Optional for admin users
-  is_active: boolean;
-  created_at?: Date; // Optional for non-authenticated users
-  updated_at?: Date; // Optional for non-authenticated users
-}
-
-export type Parish = {
-  id: number;
-  name: string;
-  code: string;
-  description?: string;
-  created_at?: Date; // Optional for non-authenticated users
-}
-export type Tag = {
-  id: number;
-  name: string;
-  color: string;
-  created_at: Date;
-}
-
-export type Initiative = {
-  id: number;
-  title: string;
-  description?: string;
-  content?: string;
-  parish_id: number;
-  category?: string; // Optional for non-authenticated users
-  status: 'draft' | 'submitted' | 'approved' | 'rejected';
-  submission_date?: Date;
-  vote_date?: Date;
-  created_by: number; // User ID of the creator
-  created_at: Date;
-  updated_at: Date;
-}
-
-export type InitiativeWithParish = Initiative & {
-  parish_name: string; // Name of the parish
-  parish_code: string; // Code of the parish
-}
-
-export type InitiativeDocument = {
-  id: number;
-  initiative_id: number;
-  filename: string;
-  original_filename: string;
-  file_path: string;
-  file_size: number;
-  mime_type: string;
-  uploaded_at: Date;
-}
-export type InitiativeTag = {
-  initiative_id: number;
-  tag_id: number;
-}
-
-export type Vote = {
-  id: number;
-  initiative_id: number;
-  voter_name: string; // Name of the voter
-  vote: 'favor' | 'against' | 'abstention'; // Type of vote
-  notes?: string; // Optional notes from the voter
-  created_at?: Date; // Optional for non-authenticated users
-}
+// Re-export types for backward compatibility
+export type { User, Parish, Tag, InitiativeDocument, Vote };
+export type { Initiative, InitiativeWithParish, FullInitiative } from '../../db/schema.js';
 
 // Create tables
 export function initializeDatabase() {
-	// Users table
-	console.log('Creating users table...');
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      role TEXT NOT NULL CHECK (role IN ('admin', 'parish')),
-      parish_id INTEGER,
-      is_active BOOLEAN DEFAULT true,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (parish_id) REFERENCES parishes(id)
-    )
-  `);
-
-	// Parishes table
-	console.log('Creating parishes table...');
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS parishes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE NOT NULL,
-      code TEXT UNIQUE NOT NULL,
-      description TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-	// Tags table
-	console.log('Creating tags table...');
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS tags (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE NOT NULL,
-      color TEXT DEFAULT '#3B82F6',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-	// Initiatives table
-	console.log('Creating initiatives table...');
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS initiatives (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      description TEXT,
-      content TEXT,
-      parish_id INTEGER NOT NULL,
-      category TEXT,
-      status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'rejected')),
-      submission_date DATETIME,
-      vote_date DATETIME,
-      created_by INTEGER NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (parish_id) REFERENCES parishes(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  `);
-
-	// Initiative documents table
-	console.log('Creating initiative_documents table...');
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS initiative_documents (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      initiative_id INTEGER NOT NULL,
-      filename TEXT NOT NULL,
-      original_filename TEXT NOT NULL,
-      file_path TEXT NOT NULL,
-      file_size INTEGER NOT NULL,
-      mime_type TEXT NOT NULL,
-      uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (initiative_id) REFERENCES initiatives(id) ON DELETE CASCADE
-    )
-  `);
-
-	// Initiative tags junction table
-	console.log('Creating initiative_tags junction table...');
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS initiative_tags (
-      initiative_id INTEGER NOT NULL,
-      tag_id INTEGER NOT NULL,
-      PRIMARY KEY (initiative_id, tag_id),
-      FOREIGN KEY (initiative_id) REFERENCES initiatives(id) ON DELETE CASCADE,
-      FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-    )
-  `);
-
-	// Votes table
-	console.log('Creating votes table...');
-	db.exec(`
-    CREATE TABLE IF NOT EXISTS votes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      initiative_id INTEGER NOT NULL,
-      voter_name TEXT NOT NULL,
-      vote TEXT NOT NULL CHECK (vote IN ('favor', 'against', 'abstention')),
-      notes TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (initiative_id) REFERENCES initiatives(id) ON DELETE CASCADE
-    )
-  `);
-
-	console.log('Database tables created successfully');
+	// Enable foreign keys
+	db.exec('PRAGMA foreign_keys = ON');
+	console.log('Database initialized with foreign keys enabled');
 }
 
 // Seed initial data
@@ -193,7 +43,7 @@ export async function seedDatabase() {
 		console.log('Starting database seeding...');
 
 		// Create default parishes
-		const parishes = [
+		const parishData = [
 			{ name: 'Parque das Nações', code: 'parque-nacoes', description: 'Freguesia do Parque das Nações' },
 			{ name: 'Alvalade', code: 'alvalade', description: 'Freguesia de Alvalade' },
 			{ name: 'Santo António', code: 'santo-antonio', description: 'Freguesia de Santo António' },
@@ -202,20 +52,14 @@ export async function seedDatabase() {
 		];
 
 		console.log('Creating parishes...');
-		const insertParish = db.prepare('INSERT OR IGNORE INTO parishes (name, code, description) VALUES ($name, $code, $description)');
-
-		for (const parish of parishes) {
+		for (const parish of parishData) {
 			console.log(`Inserting parish: ${parish.name}`);
-			insertParish.all({
-				$name: parish.name,
-				$code: parish.code,
-				$description: parish.description,
-			});
+			await drizzleDb.insert(parishes).values(parish).onConflictDoNothing();
 		}
 		console.log('Parishes created successfully');
 
 		// Create default tags
-		const tags = [
+		const tagData = [
 			{ name: 'Finanças', color: '#10B981' },
 			{ name: 'Transparência', color: '#3B82F6' },
 			{ name: 'Mobilidade', color: '#F59E0B' },
@@ -226,14 +70,9 @@ export async function seedDatabase() {
 		];
 
 		console.log('Creating tags...');
-		const insertTag = db.prepare('INSERT OR IGNORE INTO tags (name, color) VALUES ($name, $color)');
-
-		for (const tag of tags) {
+		for (const tag of tagData) {
 			console.log(`Inserting tag: ${tag.name}`);
-			insertTag.run({
-				$name: tag.name,
-				$color: tag.color,
-			});
+			await drizzleDb.insert(tags).values(tag).onConflictDoNothing();
 		}
 		console.log('Tags created successfully');
 
@@ -241,25 +80,23 @@ export async function seedDatabase() {
 		console.log('Creating admin user...');
 		const adminPassword = await bcrypt.hash('admin123', 10);
 		console.log('Admin password hashed');
-		const insertAdmin = db.prepare('INSERT OR IGNORE INTO users (email, password_hash, role) VALUES ($email, $password_hash, $role)');
-		insertAdmin.run({
-			$email: 'admin@portal.pt',
-			$password_hash: adminPassword,
-			$role: 'admin',
-		});
+		await drizzleDb.insert(users).values({
+			email: 'admin@portal.pt',
+			password_hash: adminPassword,
+			role: 'admin',
+		}).onConflictDoNothing();
 		console.log('Admin user created successfully');
 
 		// Create a sample parish user
 		console.log('Creating parish user...');
 		const parishPassword = await bcrypt.hash('parish123', 10);
 		console.log('Parish password hashed');
-		const insertParishUser = db.prepare('INSERT OR IGNORE INTO users (email, password_hash, role, parish_id) VALUES ($email, $password_hash, $role, $parish_id)');
-		insertParishUser.run({
-			$email: 'parque@portal.pt',
-			$password_hash: parishPassword,
-			$role: 'parish',
-			$parish_id: 1,
-		});
+		await drizzleDb.insert(users).values({
+			email: 'parque@portal.pt',
+			password_hash: parishPassword,
+			role: 'parish',
+			parish_id: 1,
+		}).onConflictDoNothing();
 		console.log('Parish user created successfully');
 
 		console.log('Database seeded successfully');
@@ -268,266 +105,389 @@ export async function seedDatabase() {
 	}
 }
 
-// Database query helpers - prepared statements
-const getAllUsersQuery = db.prepare<User, []>('SELECT id, email, role, parish_id, created_at FROM users ORDER BY created_at DESC');
-const getUserByEmailQuery = db.prepare<User, { $email: string }>('SELECT * FROM users WHERE email = $email');
-const getUserByIdQuery = db.prepare<User, { $id: number }>('SELECT * FROM users WHERE id = $id');
-const createUserQuery = db.prepare<null, { $email: string, $password_hash: string, $role: 'admin' | 'parish', $parish_id?: number }>('INSERT INTO users (email, password_hash, role, parish_id) VALUES ($email, $password_hash, $role, $parish_id)');
-
-// Parish queries
-const getAllParishesQuery = db.prepare<Parish, []>('SELECT * FROM parishes ORDER BY name');
-const getParishByIdQuery = db.prepare<Parish, { $id: number }>('SELECT * FROM parishes WHERE id = $id');
-const getParishByCodeQuery = db.prepare<Parish, { $code: string }>('SELECT * FROM parishes WHERE code = $code');
-
-// Initiative queries
-const getAllInitiativesQuery = db.prepare<Initiative & { parish_name: string | null, parish_code: string | null }, []>(`
-  SELECT i.*, p.name as parish_name, p.code as parish_code 
-  FROM initiatives i 
-  JOIN parishes p ON i.parish_id = p.id 
-  WHERE i.status = 'approved'
-  ORDER BY i.created_at DESC
-`);
-const getInitiativeByIdQuery = db.prepare<Initiative & { parish_name: string | null, parish_code: string | null }, { $id: number }>(`
-  SELECT i.*, p.name as parish_name, p.code as parish_code 
-  FROM initiatives i 
-  JOIN parishes p ON i.parish_id = p.id 
-  WHERE i.id = $id
-`);
-const getInitiativesByParishQuery = db.prepare<Initiative, { $parish_id: number }>(`
-  SELECT * FROM initiatives 
-  WHERE parish_id = $parish_id 
-  ORDER BY created_at DESC
-`);
-const createInitiativeQuery = db.prepare<{ lastInsertRowid: number }, { $title: string, $description: string, $content: string, $parish_id: number, $category: string, $created_by: number }>(`
-  INSERT INTO initiatives (title, description, content, parish_id, category, created_by) 
-  VALUES ($title, $description, $content, $parish_id, $category, $created_by)
-`);
-const createInitiativeFullQuery = db.prepare<{ lastInsertRowid: number }, { $title: string, $description: string, $content: string, $parish_id: number, $category: string, $created_by: number, $status: string, $submission_date: string | null }>(`
-  INSERT INTO initiatives (title, description, content, parish_id, category, created_by, status, submission_date) 
-  VALUES ($title, $description, $content, $parish_id, $category, $created_by, $status, $submission_date)
-`);
-
-// Filtered initiative search
-const searchInitiativesQuery = db.prepare<Initiative & { parish_name: string | null, parish_code: string | null }, { $search: string | null, $parish_code: string | null, $category: string | null }>(`
-  SELECT i.*, p.name as parish_name, p.code as parish_code 
-  FROM initiatives i 
-  JOIN parishes p ON i.parish_id = p.id 
-  WHERE i.status = 'approved'
-    AND ($search IS NULL OR i.title LIKE $search OR i.description LIKE $search OR i.content LIKE $search)
-    AND ($parish_code IS NULL OR p.code = $parish_code)
-    AND ($category IS NULL OR i.category = $category)
-  ORDER BY i.created_at DESC
-`);
-
-// Tag-filtered initiatives
-const searchInitiativesWithTagQuery = db.prepare<Initiative & { parish_name: string | null, parish_code: string | null }, { $search: string | null, $tag_name: string, $parish_code: string | null, $category: string | null }>(`
-  SELECT DISTINCT i.*, p.name as parish_name, p.code as parish_code 
-  FROM initiatives i 
-  JOIN parishes p ON i.parish_id = p.id 
-  JOIN initiative_tags it ON i.id = it.initiative_id
-  JOIN tags t ON it.tag_id = t.id
-  WHERE i.status = 'approved'
-    AND ($search IS NULL OR i.title LIKE $search OR i.description LIKE $search OR i.content LIKE $search)
-    AND ($parish_code IS NULL OR p.code = $parish_code)
-    AND ($category IS NULL OR i.category = $category)
-    AND t.name = $tag_name
-  ORDER BY i.created_at DESC
-`);
-
-// Tag queries
-const getAllTagsQuery = db.prepare<Tag, []>('SELECT * FROM tags ORDER BY name');
-const getTagByIdQuery = db.prepare<Tag, { $id: number }>('SELECT * FROM tags WHERE id = $id');
-const getTagByNameQuery = db.prepare<Tag, { $name: string }>('SELECT * FROM tags WHERE name = $name');
-const createTagQuery = db.prepare<{ lastInsertRowid: number }, { $name: string, $color: string }>('INSERT INTO tags (name, color) VALUES ($name, $color)');
-const getInitiativeTagsQuery = db.prepare<Tag, { $initiative_id: number }>(`
-  SELECT t.* FROM tags t 
-  JOIN initiative_tags it ON t.id = it.tag_id 
-  WHERE it.initiative_id = $initiative_id
-`);
-const addInitiativeTagQuery = db.prepare<null, { $initiative_id: number, $tag_id: number }>('INSERT INTO initiative_tags (initiative_id, tag_id) VALUES ($initiative_id, $tag_id)');
-const removeInitiativeTagQuery = db.prepare<null, { $initiative_id: number, $tag_id: number }>('DELETE FROM initiative_tags WHERE initiative_id = $initiative_id AND tag_id = $tag_id');
-const clearInitiativeTagsQuery = db.prepare<null, { $initiative_id: number }>('DELETE FROM initiative_tags WHERE initiative_id = $initiative_id');
-const updateInitiativeQuery = db.prepare<null, { $id: number, $title: string, $description: string, $content: string, $category: string }>(`
-  UPDATE initiatives 
-  SET title = $title, description = $description, content = $content, category = $category, updated_at = CURRENT_TIMESTAMP 
-  WHERE id = $id
-`);
-const updateInitiativeStatusQuery = db.prepare<null, { $id: number, $status: string }>(`
-  UPDATE initiatives 
-  SET status = $status, updated_at = CURRENT_TIMESTAMP 
-  WHERE id = $id
-`);
-const updateInitiativeFullQuery = db.prepare<null, { $id: number, $title: string, $description: string, $content: string, $category: string, $status: string, $submission_date: string | null }>(`
-  UPDATE initiatives 
-  SET title = $title, description = $description, content = $content, category = $category, status = $status, submission_date = COALESCE($submission_date, submission_date), updated_at = CURRENT_TIMESTAMP 
-  WHERE id = $id
-`);
-
-// Vote queries
-const getInitiativeVotesQuery = db.prepare<Vote, { $initiative_id: number }>('SELECT * FROM votes WHERE initiative_id = $initiative_id ORDER BY voter_name');
-
-// Document queries
-const getInitiativeDocumentsQuery = db.prepare<InitiativeDocument, { $initiative_id: number }>('SELECT * FROM initiative_documents WHERE initiative_id = $initiative_id ORDER BY uploaded_at');
-
-const addInitiativeDocumentQuery = db.prepare<void, {
-  $initiative_id: number;
-  $filename: string;
-  $original_filename: string;
-  $file_path: string;
-  $file_size: number;
-  $mime_type: string
-}>('INSERT INTO initiative_documents (initiative_id, filename, original_filename, file_path, file_size, mime_type) VALUES ($initiative_id, $filename, $original_filename, $file_path, $file_size, $mime_type) ');
-const deleteInitiativeDocumentQuery = db.prepare<void, { $id: number }>('DELETE FROM initiative_documents WHERE id = $id');
-const getInitiativeDocumentQuery = db.prepare<InitiativeDocument, { $id: number }>('SELECT * FROM initiative_documents WHERE id = $id');
-
 // Query functions
-export const queries = {
-	// User functions
+export const queries = {	// User functions
 	getAllUsers: (): User[] => {
-		return getAllUsersQuery.all();
+		return drizzleDb.select({
+			id: users.id,
+			email: users.email,
+			role: users.role,
+			parish_id: users.parish_id,
+			created_at: users.created_at,
+			password_hash: users.password_hash,
+			is_active: users.is_active,
+			updated_at: users.updated_at,
+		}).from(users).orderBy(desc(users.created_at)).all();
 	},
 
 	getUserByEmail: (email: string): User | null => {
-		return getUserByEmailQuery.get({ $email: email });
+		const result = drizzleDb.select().from(users).where(eq(users.email, email)).get();
+		return result || null;
 	},
 
 	getUserById: (id: number): User | null => {
-		return getUserByIdQuery.get({ $id: id });
+		const result = drizzleDb.select().from(users).where(eq(users.id, id)).get();
+		return result || null;
 	},
 
 	createUser: (email: string, password_hash: string, role: 'admin' | 'parish', parish_id?: number): void => {
-		createUserQuery.run({ $email: email, $password_hash: password_hash, $role: role, $parish_id: parish_id });
+		drizzleDb.insert(users).values({ email, password_hash, role, parish_id }).run();
 	},
-
 	// Parish functions
 	getAllParishes: (): Parish[] => {
-		return getAllParishesQuery.all();
+		return drizzleDb.select().from(parishes).orderBy(parishes.name).all();
 	},
 
 	getParishById: (id: number): Parish | null => {
-		return getParishByIdQuery.get({ $id: id });
+		const result = drizzleDb.select().from(parishes).where(eq(parishes.id, id)).get();
+		return result || null;
 	},
 
 	getParishByCode: (code: string): Parish | null => {
-		return getParishByCodeQuery.get({ $code: code });
+		const result = drizzleDb.select().from(parishes).where(eq(parishes.code, code)).get();
+		return result || null;
 	},
 
 	// Initiative functions
 	getAllInitiatives: () => {
-		return getAllInitiativesQuery.all();
+		return drizzleDb.select({
+			id: initiatives.id,
+			title: initiatives.title,
+			description: initiatives.description,
+			content: initiatives.content,
+			parish_id: initiatives.parish_id,
+			category: initiatives.category,
+			status: initiatives.status,
+			submission_date: initiatives.submission_date,
+			vote_date: initiatives.vote_date,
+			created_by: initiatives.created_by,
+			created_at: initiatives.created_at,
+			updated_at: initiatives.updated_at,
+			parish_name: parishes.name,
+			parish_code: parishes.code,
+		})
+			.from(initiatives)
+			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
+			.where(eq(initiatives.status, 'approved'))
+			.orderBy(desc(initiatives.created_at))
+			.all();
 	},
 
 	getInitiativeById: (id: number) => {
-		return getInitiativeByIdQuery.get({ $id: id });
+		const result = drizzleDb.select({
+			id: initiatives.id,
+			title: initiatives.title,
+			description: initiatives.description,
+			content: initiatives.content,
+			parish_id: initiatives.parish_id,
+			category: initiatives.category,
+			status: initiatives.status,
+			submission_date: initiatives.submission_date,
+			vote_date: initiatives.vote_date,
+			created_by: initiatives.created_by,
+			created_at: initiatives.created_at,
+			updated_at: initiatives.updated_at,
+			parish_name: parishes.name,
+			parish_code: parishes.code,
+		})
+			.from(initiatives)
+			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
+			.where(eq(initiatives.id, id))
+			.get();
+		return result || null;
 	},
 
 	getInitiativesByParish: (parish_id: number) => {
-		return getInitiativesByParishQuery.all({ $parish_id: parish_id });
+		return drizzleDb.select().from(initiatives)
+			.where(eq(initiatives.parish_id, parish_id))
+			.orderBy(desc(initiatives.created_at))
+			.all();
 	},
 
 	createInitiative: (title: string, description: string, content: string, parish_id: number, category: string, created_by: number) => {
-		const result = createInitiativeQuery.run({ $title: title, $description: description, $content: content, $parish_id: parish_id, $category: category, $created_by: created_by });
-		return result.lastInsertRowid as number;
+		const result = drizzleDb.insert(initiatives).values({
+			title,
+			description,
+			content,
+			parish_id,
+			category,
+			created_by,
+		}).returning({ id: initiatives.id }).get();
+		return result.id;
 	},
 
 	createInitiativeFull: (title: string, description: string, content: string, parish_id: number, category: string, created_by: number, status: string, submission_date: string | null) => {
-		const result = createInitiativeFullQuery.run({ $title: title, $description: description, $content: content, $parish_id: parish_id, $category: category, $created_by: created_by, $status: status, $submission_date: submission_date });
-		return result.lastInsertRowid as number;
+		const result = drizzleDb.insert(initiatives).values({
+			title,
+			description,
+			content,
+			parish_id,
+			category,
+			created_by,
+			status: status as 'draft' | 'submitted' | 'approved' | 'rejected',
+			submission_date,
+		}).returning({ id: initiatives.id }).get();
+		return result.id;
 	},
 
 	getFullInitiativeById: (id: number) => {
-		const initiative = getInitiativeByIdQuery.get({ $id: id });
+		const initiative = drizzleDb.select({
+			id: initiatives.id,
+			title: initiatives.title,
+			description: initiatives.description,
+			content: initiatives.content,
+			parish_id: initiatives.parish_id,
+			category: initiatives.category,
+			status: initiatives.status,
+			submission_date: initiatives.submission_date,
+			vote_date: initiatives.vote_date,
+			created_by: initiatives.created_by,
+			created_at: initiatives.created_at,
+			updated_at: initiatives.updated_at,
+			parish_name: parishes.name,
+			parish_code: parishes.code,
+		})
+			.from(initiatives)
+			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
+			.where(eq(initiatives.id, id))
+			.get();
 
 		if (!initiative) {
 			return null;
 		}
 
 		// Get related data
-		const tags = getInitiativeTagsQuery.all({ $initiative_id: id });
-		const votes = getInitiativeVotesQuery.all({ $initiative_id: id });
-		const documents = getInitiativeDocumentsQuery.all({ $initiative_id: id });
+		const initiativeTags = drizzleDb.select().from(tags)
+			.innerJoin(initiative_tags, eq(tags.id, initiative_tags.tag_id))
+			.where(eq(initiative_tags.initiative_id, id))
+			.all();
+
+		const initiativeVotes = drizzleDb.select().from(votes)
+			.where(eq(votes.initiative_id, id))
+			.all();
+
+		const documents = drizzleDb.select().from(initiative_documents)
+			.where(eq(initiative_documents.initiative_id, id))
+			.all();
 
 		return {
 			...initiative,
-			tags,
-			votes,
+			tags: initiativeTags.map(row => row.tags),
+			votes: initiativeVotes,
 			documents,
 		};
 	},
 
 	// Search functions
 	searchInitiatives: (search: string | null, parish_code: string | null, category: string | null) => {
-		return searchInitiativesQuery.all({ $search: search, $parish_code: parish_code, $category: category });
+		const baseQuery = drizzleDb.select({
+			id: initiatives.id,
+			title: initiatives.title,
+			description: initiatives.description,
+			content: initiatives.content,
+			parish_id: initiatives.parish_id,
+			category: initiatives.category,
+			status: initiatives.status,
+			submission_date: initiatives.submission_date,
+			vote_date: initiatives.vote_date,
+			created_by: initiatives.created_by,
+			created_at: initiatives.created_at,
+			updated_at: initiatives.updated_at,
+			parish_name: parishes.name,
+			parish_code: parishes.code,
+		})
+			.from(initiatives)
+			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id));
+
+		// Apply filters
+		const conditions = [eq(initiatives.status, 'approved')];
+
+		if (search) {
+			conditions.push(
+				or(
+					like(initiatives.title, `%${search}%`),
+					like(initiatives.description, `%${search}%`),
+					like(initiatives.content, `%${search}%`),
+				)!,
+			);
+		}
+
+		if (parish_code) {
+			conditions.push(eq(parishes.code, parish_code));
+		}
+
+		if (category) {
+			conditions.push(eq(initiatives.category, category));
+		}
+
+		return baseQuery.where(and(...conditions)).orderBy(desc(initiatives.created_at)).all();
 	},
 
 	searchInitiativesWithTag: (search: string | null, tag_name: string, parish_code: string | null, category: string | null) => {
-		return searchInitiativesWithTagQuery.all({ $search: search, $tag_name: tag_name, $parish_code: parish_code, $category: category });
-	},
+		const conditions = [eq(initiatives.status, 'approved'), eq(tags.name, tag_name)];
 
+		if (search) {
+			conditions.push(
+				or(
+					like(initiatives.title, `%${search}%`),
+					like(initiatives.description, `%${search}%`),
+					like(initiatives.content, `%${search}%`),
+				)!,
+			);
+		}
+
+		if (parish_code) {
+			conditions.push(eq(parishes.code, parish_code));
+		}
+
+		if (category) {
+			conditions.push(eq(initiatives.category, category));
+		}
+
+		return drizzleDb.selectDistinct({
+			id: initiatives.id,
+			title: initiatives.title,
+			description: initiatives.description,
+			content: initiatives.content,
+			parish_id: initiatives.parish_id,
+			category: initiatives.category,
+			status: initiatives.status,
+			submission_date: initiatives.submission_date,
+			vote_date: initiatives.vote_date,
+			created_by: initiatives.created_by,
+			created_at: initiatives.created_at,
+			updated_at: initiatives.updated_at,
+			parish_name: parishes.name,
+			parish_code: parishes.code,
+		})
+			.from(initiatives)
+			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
+			.innerJoin(initiative_tags, eq(initiatives.id, initiative_tags.initiative_id))
+			.innerJoin(tags, eq(initiative_tags.tag_id, tags.id))
+			.where(and(...conditions))
+			.orderBy(desc(initiatives.created_at))
+			.all();
+	},
 	// Tag functions
 	getAllTags: (): Tag[] => {
-		return getAllTagsQuery.all();
+		return drizzleDb.select().from(tags).orderBy(tags.name).all();
 	},
 
 	getTagById: (id: number): Tag | null => {
-		return getTagByIdQuery.get({ $id: id });
+		const result = drizzleDb.select().from(tags).where(eq(tags.id, id)).get();
+		return result || null;
 	},
 
 	getTagByName: (name: string): Tag | null => {
-		return getTagByNameQuery.get({ $name: name });
+		const result = drizzleDb.select().from(tags).where(eq(tags.name, name)).get();
+		return result || null;
 	},
 
 	createTag: (name: string, color: string): number => {
-		const result = createTagQuery.run({ $name: name, $color: color });
-		return result.lastInsertRowid as number;
+		const result = drizzleDb.insert(tags).values({ name, color }).returning({ id: tags.id }).get();
+		return result.id;
 	},
 
 	getInitiativeTags: (initiative_id: number): Tag[] => {
-		return getInitiativeTagsQuery.all({ $initiative_id: initiative_id });
+		const result = drizzleDb.select().from(tags)
+			.innerJoin(initiative_tags, eq(tags.id, initiative_tags.tag_id))
+			.where(eq(initiative_tags.initiative_id, initiative_id))
+			.all();
+
+		return result.map(row => row.tags);
 	},
 
 	addInitiativeTag: (initiative_id: number, tag_id: number): void => {
-		addInitiativeTagQuery.run({ $initiative_id: initiative_id, $tag_id: tag_id });
+		drizzleDb.insert(initiative_tags).values({ initiative_id, tag_id }).run();
 	},
 
 	removeInitiativeTag: (initiative_id: number, tag_id: number): void => {
-		removeInitiativeTagQuery.run({ $initiative_id: initiative_id, $tag_id: tag_id });
+		drizzleDb.delete(initiative_tags)
+			.where(and(
+				eq(initiative_tags.initiative_id, initiative_id),
+				eq(initiative_tags.tag_id, tag_id),
+			)).run();
 	},
 
 	clearInitiativeTags: (initiative_id: number): void => {
-		clearInitiativeTagsQuery.run({ $initiative_id: initiative_id });
+		drizzleDb.delete(initiative_tags)
+			.where(eq(initiative_tags.initiative_id, initiative_id)).run();
 	},
 
 	updateInitiative: (id: number, title: string, description: string, content: string, category: string): void => {
-		updateInitiativeQuery.run({ $id: id, $title: title, $description: description, $content: content, $category: category });
+		drizzleDb.update(initiatives)
+			.set({
+				title,
+				description,
+				content,
+				category,
+				updated_at: (new Date).toISOString(),
+			})
+			.where(eq(initiatives.id, id)).run();
 	},
 
 	updateInitiativeStatus: (id: number, status: 'draft' | 'submitted' | 'approved' | 'rejected'): void => {
-		updateInitiativeStatusQuery.run({ $id: id, $status: status });
+		drizzleDb.update(initiatives)
+			.set({
+				status,
+				updated_at: (new Date).toISOString(),
+			})
+			.where(eq(initiatives.id, id)).run();
 	},
 
 	updateInitiativeFull: (id: number, title: string, description: string, content: string, category: string, status: string, submission_date: string | null): void => {
-		updateInitiativeFullQuery.run({ $id: id, $title: title, $description: description, $content: content, $category: category, $status: status, $submission_date: submission_date });
-	},
+		const updateData: Partial<typeof initiatives.$inferInsert> = {
+			title,
+			description,
+			content,
+			category,
+			status: status as 'draft' | 'submitted' | 'approved' | 'rejected',
+			updated_at: (new Date).toISOString(),
+		};
 
+		if (submission_date !== null) {
+			updateData.submission_date = submission_date;
+		}
+
+		drizzleDb.update(initiatives)
+			.set(updateData)
+			.where(eq(initiatives.id, id)).run();
+	},
 	// Vote functions
 	getInitiativeVotes: (initiative_id: number): Vote[] => {
-		return getInitiativeVotesQuery.all({ $initiative_id: initiative_id });
+		return drizzleDb.select().from(votes)
+			.where(eq(votes.initiative_id, initiative_id))
+			.orderBy(votes.voter_name)
+			.all();
 	},
 
 	// Document functions
 	getInitiativeDocuments: (initiative_id: number): InitiativeDocument[] => {
-		return getInitiativeDocumentsQuery.all({ $initiative_id: initiative_id });
+		return drizzleDb.select().from(initiative_documents)
+			.where(eq(initiative_documents.initiative_id, initiative_id))
+			.orderBy(initiative_documents.uploaded_at)
+			.all();
 	},
 
 	addInitiativeDocument: (initiative_id: number, filename: string, original_filename: string, file_path: string, file_size: number, mime_type: string): void => {
-		addInitiativeDocumentQuery.run({ $initiative_id: initiative_id, $filename: filename, $original_filename: original_filename, $file_path: file_path, $file_size: file_size, $mime_type: mime_type });
+		drizzleDb.insert(initiative_documents).values({
+			initiative_id,
+			filename,
+			original_filename,
+			file_path,
+			file_size,
+			mime_type,
+		}).run();
 	},
 
 	deleteInitiativeDocument: (id: number): InitiativeDocument | undefined => {
-		const document = getInitiativeDocumentQuery.get({ $id: id }) ?? undefined;
+		const document = drizzleDb.select().from(initiative_documents)
+			.where(eq(initiative_documents.id, id)).get();
+
 		if (document) {
-			deleteInitiativeDocumentQuery.run({ $id: id });
+			drizzleDb.delete(initiative_documents)
+				.where(eq(initiative_documents.id, id)).run();
+
 			// Also delete the physical file
 			try {
 				if (fs.existsSync(document.file_path)) {
@@ -536,19 +496,16 @@ export const queries = {
 			} catch (error) {
 				console.error('Error deleting file:', error);
 			}
+
+			return document;
 		}
-		return document;
+		return undefined;
 	},
 
 	getInitiativeDocument: (id: number): InitiativeDocument | undefined => {
-		return getInitiativeDocumentQuery.get({ $id: id }) ?? undefined;
+		const result = drizzleDb.select().from(initiative_documents)
+			.where(eq(initiative_documents.id, id)).get();
+
+		return result || undefined;
 	},
 };
-
-export type FullInitiative = Initiative & {
-  parish_name?: string;
-  parish_code?: string;
-  tags: Tag[];
-  votes: Vote[];
-  documents: InitiativeDocument[];
-}

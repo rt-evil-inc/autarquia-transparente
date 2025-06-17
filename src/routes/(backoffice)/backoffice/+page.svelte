@@ -5,7 +5,8 @@
 
 	let { data } = $props();
 
-	function formatDate(dateStr: string | Date) {
+	function formatDate(dateStr: string | Date | null) {
+		if (!dateStr) return 'N/A';
 		return new Date(dateStr).toLocaleDateString('pt-PT');
 	}
 

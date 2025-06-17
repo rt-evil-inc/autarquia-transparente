@@ -63,7 +63,7 @@ export async function authenticateUser(email: string, password: string): Promise
     id: user.id,
     email: user.email,
     role: user.role,
-    parish_id: user.parish_id,
+    parish_id: user.parish_id ?? undefined,
     is_active: user.is_active,
   };
 }
@@ -85,7 +85,7 @@ export function getUserFromToken(token: string): User | null {
     id: user.id,
     email: user.email,
     role: user.role,
-    parish_id: user.parish_id,
+    parish_id: user.parish_id ?? undefined,
     is_active: user.is_active,
   };
 }

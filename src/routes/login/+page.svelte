@@ -4,7 +4,6 @@
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
 
 	let email = '';
 	let password = '';
@@ -32,30 +31,21 @@
 				if (data.user.role === 'admin') {
 					goto('/backoffice/admin');
 				} else if (data.user.role === 'parish') {
-					goto('/backoffice/parish');
+					goto('/backoffice');
 				} else {
 					goto('/');
 				}
 			} else {
 				error = data.error || 'Login failed';
 			}
-		} catch (err) {
+		} catch {
 			error = 'Network error. Please try again.';
 		} finally {
 			loading = false;
 		}
 	}
 
-	// Redirect if already logged in
-	if ($page.data?.user) {
-		if ($page.data.user.role === 'admin') {
-			goto('/backoffice/admin');
-		} else if ($page.data.user.role === 'parish') {
-			goto('/backoffice/parish');
-		} else {
-			goto('/');
-		}
-	}
+// Redirect if already logged in - handled in +page.ts
 </script>
 
 <svelte:head>

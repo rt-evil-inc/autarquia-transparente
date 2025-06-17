@@ -13,7 +13,8 @@
 
 	let initiative = data.initiative;
 
-	function formatDate(dateStr: string) {
+	function formatDate(dateStr: string | null) {
+		if (!dateStr) return 'Data não disponível';
 		return new Date(dateStr).toLocaleDateString('pt-PT', {
 			year: 'numeric',
 			month: 'long',

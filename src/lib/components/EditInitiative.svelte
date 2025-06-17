@@ -449,7 +449,7 @@
 												<p class="text-sm font-medium text-gray-900">{document.original_filename}</p>
 												<p class="text-xs text-gray-500">
 													{(document.file_size / 1024 / 1024).toFixed(2)} MB •
-													Carregado em {new Date(document.uploaded_at).toLocaleDateString('pt-PT')}
+													Carregado em {document.uploaded_at ? new Date(document.uploaded_at).toLocaleDateString('pt-PT') : 'Data desconhecida'}
 												</p>
 											</div>
 										</div>

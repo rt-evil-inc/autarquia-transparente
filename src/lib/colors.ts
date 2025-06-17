@@ -58,7 +58,13 @@ export function getTagColorByName(name: string): TagColor | undefined {
 	return TAG_COLORS.find(color => color.name === name);
 }
 
-export function getTagClasses(tagColor: string): string {
+export function getTagClasses(tagColor: string | null): string {
+	// Handle null values - use default
+	if (!tagColor) {
+		const defaultColor = getDefaultTagColor();
+		return `${defaultColor.bg} ${defaultColor.text} ${defaultColor.border} border`;
+	}
+
 	// First try to find by hex (for backward compatibility)
 	let colorConfig = getTagColorByHex(tagColor);
 
