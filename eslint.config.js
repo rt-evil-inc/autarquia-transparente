@@ -96,8 +96,9 @@ export default [
 		},
 	},
 	{
-		files: ['*.svelte'],
+		files: ['**/*.svelte'],
 		rules: {
+			'svelte/indent': 'error',
 			'indent': 'off',
 		},
 	},

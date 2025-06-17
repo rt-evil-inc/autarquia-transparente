@@ -4,19 +4,19 @@ import fs from 'fs';
 import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { eq, and, like, or, desc } from 'drizzle-orm';
 import {
-  parishes,
-  users,
-  tags,
-  initiatives,
-  initiative_documents,
-  initiative_tags,
-  votes,
-  // Import types from schema
-  type User,
-  type Parish,
-  type Tag,
-  type InitiativeDocument,
-  type Vote,
+	parishes,
+	users,
+	tags,
+	initiatives,
+	initiative_documents,
+	initiative_tags,
+	votes,
+	// Import types from schema
+	type User,
+	type Parish,
+	type Tag,
+	type InitiativeDocument,
+	type Vote,
 } from '../../db/schema.js';
 
 // Initialize database with strict mode

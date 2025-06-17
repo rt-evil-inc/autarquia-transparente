@@ -2,7 +2,7 @@
 import '$lib/server/init.js';
 
 export const load = async ({ locals }) => {
-  return {
-    user: locals.user || null,
-  };
+	return {
+		user: locals.user || null,
+	};
 };

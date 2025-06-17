@@ -2,71 +2,71 @@ import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm';
 
 export const parishes = sqliteTable('parishes', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').unique().notNull(),
-  code: text('code').unique().notNull(),
-  description: text('description'),
-  created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	name: text('name').unique().notNull(),
+	code: text('code').unique().notNull(),
+	description: text('description'),
+	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  email: text('email').unique().notNull(),
-  password_hash: text('password_hash').notNull(),
-  role: text('role', { enum: ['admin', 'parish'] }).notNull(),
-  parish_id: integer('parish_id').references(() => parishes.id),
-  is_active: integer('is_active', { mode: 'boolean' }).default(true),
-  created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	email: text('email').unique().notNull(),
+	password_hash: text('password_hash').notNull(),
+	role: text('role', { enum: ['admin', 'parish'] }).notNull(),
+	parish_id: integer('parish_id').references(() => parishes.id),
+	is_active: integer('is_active', { mode: 'boolean' }).default(true),
+	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+	updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const tags = sqliteTable('tags', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').unique().notNull(),
-  color: text('color').default('#3B82F6'),
-  created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	name: text('name').unique().notNull(),
+	color: text('color').default('#3B82F6'),
+	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const initiatives = sqliteTable('initiatives', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  title: text('title').notNull(),
-  description: text('description'),
-  content: text('content'),
-  parish_id: integer('parish_id').notNull().references(() => parishes.id),
-  category: text('category'),
-  status: text('status', { enum: ['draft', 'submitted', 'approved', 'rejected'] }).notNull().default('draft'),
-  submission_date: text('submission_date'),
-  vote_date: text('vote_date'),
-  created_by: integer('created_by').notNull().references(() => users.id),
-  created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	title: text('title').notNull(),
+	description: text('description'),
+	content: text('content'),
+	parish_id: integer('parish_id').notNull().references(() => parishes.id),
+	category: text('category'),
+	status: text('status', { enum: ['draft', 'submitted', 'approved', 'rejected'] }).notNull().default('draft'),
+	submission_date: text('submission_date'),
+	vote_date: text('vote_date'),
+	created_by: integer('created_by').notNull().references(() => users.id),
+	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+	updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const initiative_documents = sqliteTable('initiative_documents', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  initiative_id: integer('initiative_id').notNull().references(() => initiatives.id, { onDelete: 'cascade' }),
-  filename: text('filename').notNull(),
-  original_filename: text('original_filename').notNull(),
-  file_path: text('file_path').notNull(),
-  file_size: integer('file_size').notNull(),
-  mime_type: text('mime_type').notNull(),
-  uploaded_at: text('uploaded_at').default(sql`CURRENT_TIMESTAMP`),
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	initiative_id: integer('initiative_id').notNull().references(() => initiatives.id, { onDelete: 'cascade' }),
+	filename: text('filename').notNull(),
+	original_filename: text('original_filename').notNull(),
+	file_path: text('file_path').notNull(),
+	file_size: integer('file_size').notNull(),
+	mime_type: text('mime_type').notNull(),
+	uploaded_at: text('uploaded_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const initiative_tags = sqliteTable('initiative_tags', {
-  initiative_id: integer('initiative_id').notNull().references(() => initiatives.id, { onDelete: 'cascade' }),
-  tag_id: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+	initiative_id: integer('initiative_id').notNull().references(() => initiatives.id, { onDelete: 'cascade' }),
+	tag_id: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
 }, table => ({
-  pk: primaryKey({ columns: [table.initiative_id, table.tag_id] }),
+	pk: primaryKey({ columns: [table.initiative_id, table.tag_id] }),
 }));
 
 export const votes = sqliteTable('votes', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  initiative_id: integer('initiative_id').notNull().references(() => initiatives.id, { onDelete: 'cascade' }),
-  voter_name: text('voter_name').notNull(),
-  vote: text('vote', { enum: ['favor', 'against', 'abstention'] }).notNull(),
-  notes: text('notes'),
-  created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	initiative_id: integer('initiative_id').notNull().references(() => initiatives.id, { onDelete: 'cascade' }),
+	voter_name: text('voter_name').notNull(),
+	vote: text('vote', { enum: ['favor', 'against', 'abstention'] }).notNull(),
+	notes: text('notes'),
+	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
 // Export inferred types from schema

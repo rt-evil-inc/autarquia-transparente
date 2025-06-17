@@ -8,17 +8,17 @@ export type FullInitiativeResponse = Initiative & {
 }
 
 export const GET: RequestHandler = async ({ params }) => {
-  const { id } = params;
+	const { id } = params;
 
-  if (!id || isNaN(Number(id))) {
-    error(400, 'Invalid initiative ID');
-  }
+	if (!id || isNaN(Number(id))) {
+		error(400, 'Invalid initiative ID');
+	}
 
-  const fullInitiative = queries.getFullInitiativeById(Number(id));
+	const fullInitiative = queries.getFullInitiativeById(Number(id));
 
-  if (!fullInitiative || fullInitiative.status === 'draft') {
-    error(404, 'Initiative not found');
-  }
+	if (!fullInitiative || fullInitiative.status === 'draft') {
+		error(404, 'Initiative not found');
+	}
 
-  return json(fullInitiative);
+	return json(fullInitiative);
 };
