@@ -89,9 +89,16 @@ export default [
 			'template-tag-spacing': ['error', 'never'],
 			'wrap-iife': ['error', 'inside'],
 			'yield-star-spacing': ['error', { before: false, after: true }],
+			'indent': ['error', 'tab'],
 			'svelte/indent': ['error', { 'indent': 'tab' }],
 			'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
 			'@typescript-eslint/no-explicit-any': 'warn',
+		},
+	},
+	{
+		files: ['*.svelte'],
+		rules: {
+			'indent': 'off',
 		},
 	},
 ];
