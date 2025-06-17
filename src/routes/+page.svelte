@@ -11,9 +11,9 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { getTagClasses } from '$lib/colors';
-	import type { PageData } from './$types';
+	import Tag from '$lib/components/Tag.svelte';
 
-	let { data }: { data: PageData } = $props();
+	let { data } = $props();
 
 	// Extract data from props
 	let initiatives = data.initiatives;
@@ -268,13 +268,7 @@
 								}}
 							>
 								<span class="flex items-center gap-2">
-									<span
-										class="px-2 py-1 rounded text-xs {getTagClasses(
-											tag.color,
-										)}"
-									>
-										{tag.name}
-									</span>
+									<Tag tag={tag} />
 								</span>
 							</DropdownMenu.Item>
 						{/each}
@@ -340,13 +334,7 @@
 							{#if initiative.tags && initiative.tags.length > 0}
 								<div class="flex flex-wrap gap-1 mb-4">
 									{#each initiative.tags as tag (tag.id)}
-										<span
-											class="text-xs px-2 py-1 rounded-full {getTagClasses(
-												tag.color,
-											)}"
-										>
-											{tag.name}
-										</span>
+										<Tag tag={tag} />
 									{/each}
 								</div>
 							{/if}

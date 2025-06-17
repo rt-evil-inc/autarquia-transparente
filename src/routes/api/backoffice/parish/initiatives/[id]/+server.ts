@@ -58,8 +58,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		error(400, { message: 'Invalid initiative ID' });
 	}
 
-	if (!locals.user?.parish_id) {
-		error(400, { message: 'Parish ID not found' });
+	if (!locals.user) {
+		error(401, { message: 'Authentication required' });
 	}
 
 	// Get the initiative with all related data using the getFullInitiativeById function
@@ -69,10 +69,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		error(404, { message: 'Initiative not found' });
 	}
 
-	// Verify the initiative belongs to this parish user
-	if (initiative.parish_id !== locals.user.parish_id || initiative.created_by !== locals.user.id) {
-		error(404, { message: 'Initiative not found' });
-	}
+	// No ownership verification - anyone can view any initiative
 
 	return json(initiative);
 };
@@ -84,8 +81,8 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		error(400, { message: 'Invalid initiative ID' });
 	}
 
-	if (!locals.user?.parish_id) {
-		error(400, { message: 'Parish ID not found' });
+	if (!locals.user) {
+		error(401, { message: 'Authentication required' });
 	}
 
 	const contentType = request.headers.get('content-type') || '';
@@ -111,10 +108,10 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		error(400, { message: 'Title is required' });
 	}
 
-	// Check if initiative exists and belongs to this parish user
+	// Check if initiative exists (no ownership verification)
 	const existing = queries.getInitiativeById(Number(id));
 
-	if (!existing || existing.parish_id !== locals.user.parish_id || existing.created_by !== locals.user.id) {
+	if (!existing) {
 		error(404, { message: 'Initiative not found' });
 	}
 

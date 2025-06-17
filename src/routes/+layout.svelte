@@ -1,7 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import * as Menubar from '$lib/components/ui/menubar/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
 
 	let { children, data } = $props();
 
@@ -28,122 +27,92 @@
 				</a>
 			</div>
 
-			<!-- Menubar Navigation -->
+			<!-- Navigation Menu -->
 			<div class="flex items-center space-x-2">
-				<Menubar.Root class="border-none bg-transparent">
-					<!-- Iniciativas as simple button -->
-					<Button
-						variant="ghost"
-						class="h-auto px-4 py-2 text-gray-800 hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 font-medium transition-colors"
-						onclick={() => window.location.href = '/'}
-					>
-						Iniciativas
-					</Button>
+				<NavigationMenu.Root viewport={false}>
+					<NavigationMenu.List>
+						<!-- Public Iniciativas Link -->
+						<NavigationMenu.Item>
+							<NavigationMenu.Link>
+								{#snippet child()}
+									<a href="/" class="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+										Iniciativas
+									</a>
+								{/snippet}
+							</NavigationMenu.Link>
+						</NavigationMenu.Item>
 
-					{#if data.user}
-						{#if data.user.role === 'admin'}
-							<!-- Admin Menu -->
-							<Menubar.Menu>
-								<Menubar.Trigger>
-									Administração
-								</Menubar.Trigger>
-								<Menubar.Content class="min-w-48 bg-white border border-gray-200 shadow-lg rounded-md">
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/admin" class="flex w-full">
-											Dashboard Admin
-										</a>
-									</Menubar.Item>
-									<Menubar.Separator class="h-px bg-gray-200" />
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/admin/initiatives" class="flex w-full">
-											Gerir Iniciativas
-										</a>
-									</Menubar.Item>
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/admin/parishes" class="flex w-full">
-											Gerir Freguesias
-										</a>
-									</Menubar.Item>
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/admin/users" class="flex w-full">
-											Gerir Utilizadores
-										</a>
-									</Menubar.Item>
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/admin/tags" class="flex w-full">
-											Gerir Tags
-										</a>
-									</Menubar.Item>
-								</Menubar.Content>
-							</Menubar.Menu>
-						{:else if data.user.role === 'parish'}
-							<!-- Parish Menu -->
-							<Menubar.Menu>
-								<Menubar.Trigger>
-									Freguesia
-								</Menubar.Trigger>
-								<Menubar.Content class="min-w-48 bg-white border border-gray-200 shadow-lg rounded-md">
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/parish" class="flex w-full">
-											Dashboard Freguesia
-										</a>
-									</Menubar.Item>
-									<Menubar.Separator class="h-px bg-gray-200" />
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/parish/initiatives" class="flex w-full">
-											Minhas Iniciativas
-										</a>
-									</Menubar.Item>
-									<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-										<a href="/backoffice/parish/initiatives/new" class="flex w-full">
-											Nova Iniciativa
-											<Menubar.Shortcut>⌘N</Menubar.Shortcut>
-										</a>
-									</Menubar.Item>
-								</Menubar.Content>
-							</Menubar.Menu>
-						{/if}
+						{#if data.user}
+							<!-- Minhas Iniciativas Menu -->
+							<NavigationMenu.Item>
+								<NavigationMenu.Trigger>Minhas Iniciativas</NavigationMenu.Trigger>
+								<NavigationMenu.Content>
+									<ul class="grid w-[200px] gap-2 p-2">
+										<li>
+											<NavigationMenu.Link href="/backoffice">
+												<div class="font-medium">Ver</div>
+												<div class="text-muted-foreground text-sm">
+													Ver todas as suas iniciativas
+												</div>
+											</NavigationMenu.Link>
+											<NavigationMenu.Link href="/backoffice/initiatives/new">
+												<div class="font-medium">Nova</div>
+												<div class="text-muted-foreground text-sm">
+													Criar uma nova iniciativa
+												</div>
+											</NavigationMenu.Link>
+										</li>
+									</ul>
+								</NavigationMenu.Content>
+							</NavigationMenu.Item>
 
-						<!-- User Account Menu -->
-						<Menubar.Menu>
-							<Menubar.Trigger class="px-4 py-2 text-gray-800 hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:text-gray-900 data-[state=open]:bg-gray-100 data-[state=open]:text-gray-900 transition-colors">
-								<div class="flex items-center space-x-2">
-									<div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-										<span class="text-xs font-medium text-blue-700">
-											{data.user.email.charAt(0).toUpperCase()}
-										</span>
+							<!-- Admin/Management Menu - simplified -->
+							<NavigationMenu.Item>
+								<NavigationMenu.Link>
+									{#snippet child()}
+										<a href="/backoffice/admin" class="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+											Administração
+										</a>
+									{/snippet}
+								</NavigationMenu.Link>
+							</NavigationMenu.Item>
+
+							<!-- User Account Menu -->
+							<NavigationMenu.Item>
+								<NavigationMenu.Trigger>
+									<div class="flex items-center space-x-2">
+										<div class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+											<span class="text-xs font-medium text-blue-700">
+												{data.user.email.charAt(0).toUpperCase()}
+											</span>
+										</div>
+										<span class="text-sm font-medium">{data.user.email}</span>
 									</div>
-									<span class="text-sm font-medium">{data.user.email}</span>
-								</div>
-							</Menubar.Trigger>
-							<Menubar.Content class="bg-white border border-gray-200 shadow-lg rounded-md">
-								<Menubar.Item disabled class="px-3 py-2 text-sm text-gray-600">
-									Conta: {data.user.role === 'admin' ? 'Administrador' : 'Freguesia'}
-								</Menubar.Item>
-								<Menubar.Separator class="h-px bg-gray-200" />
-								<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-									Perfil
-								</Menubar.Item>
-								<Menubar.Item class="px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 cursor-pointer transition-colors">
-									Configurações
-								</Menubar.Item>
-								<Menubar.Separator class="h-px bg-gray-200" />
-								<Menubar.Item onclick={logout} class="px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700 cursor-pointer transition-colors">
-									Terminar Sessão
-								</Menubar.Item>
-							</Menubar.Content>
-						</Menubar.Menu>
-					{:else}
-						<!-- Login Button for Non-authenticated Users -->
-						<Button
-							variant="outline"
-							class="ml-2 border-gray-300 text-gray-800 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900 transition-colors"
-							onclick={() => window.location.href = '/login'}
-						>
-							Entrar
-						</Button>
-					{/if}
-				</Menubar.Root>
+								</NavigationMenu.Trigger>
+								<NavigationMenu.Content>
+									<ul class="grid w-[200px] gap-2 p-2">
+										<li>
+											<NavigationMenu.Link href="#" onclick={logout} class="text-red-600 hover:text-red-700">
+												<div class="font-medium">Terminar Sessão</div>
+											</NavigationMenu.Link>
+										</li>
+									</ul>
+								</NavigationMenu.Content>
+							</NavigationMenu.Item>
+						{:else}
+							<!-- Login Button for Non-authenticated Users -->
+							<NavigationMenu.Item>
+								<NavigationMenu.Link>
+									{#snippet child()}
+										<a href="/login" class="group inline-flex h-10 w-max items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+											Entrar
+										</a>
+									{/snippet}
+								</NavigationMenu.Link>
+							</NavigationMenu.Item>
+						{/if}
+					</NavigationMenu.List>
+				</NavigationMenu.Root>
 			</div>
 		</div>
 	</div>

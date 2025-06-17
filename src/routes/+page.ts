@@ -88,12 +88,3 @@ export const load: PageLoad = async ({ url, fetch }) => {
 		throw error(500, 'Failed to load page data');
 	}
 };
-
-export type PageData = InitiativeListData & {
-  filters: {
-    searchTerm: string;
-    selectedParish: string;
-    selectedCategory: string;
-    selectedTag: string;
-  };
-};

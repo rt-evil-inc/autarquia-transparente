@@ -14,7 +14,7 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
     }
 
     const payload = verifyToken(token);
-    if (!payload || payload.role !== 'parish') {
+    if (!payload) {
       throw error(403, { message: 'Acesso negado' });
     }
 
@@ -25,9 +25,9 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
       throw error(400, { message: 'ID inválido' });
     }
 
-    // Verify the initiative belongs to this parish
+    // Verify the initiative exists (no parish restriction)
     const initiative = db.getInitiativeById(initiativeId);
-    if (!initiative || initiative.parish_id !== payload.parish_id) {
+    if (!initiative) {
       throw error(404, { message: 'Iniciativa não encontrada' });
     }
 

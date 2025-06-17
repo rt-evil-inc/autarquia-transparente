@@ -12,12 +12,12 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   }
 
-  // Check for protected routes
+  // Check for protected routes - now all backoffice routes just need authentication
   const pathname = event.url.pathname;
 
-  // Admin routes protection
-  if (pathname.startsWith('/backoffice/admin')) {
-    if (!event.locals.user || event.locals.user.role !== 'admin') {
+  // All backoffice routes protection (no role distinction)
+  if (pathname.startsWith('/backoffice')) {
+    if (!event.locals.user) {
       if (event.request.headers.get('accept')?.includes('application/json')) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
@@ -28,31 +28,9 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   }
 
-  // Parish routes protection
-  if (pathname.startsWith('/backoffice/parish')) {
-    if (!event.locals.user || event.locals.user.role !== 'parish') {
-      if (event.request.headers.get('accept')?.includes('application/json')) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { 'content-type': 'application/json' },
-        });
-      }
-      return Response.redirect(new URL('/login', event.url), 302);
-    }
-  }
-
-  // API routes protection
-  if (pathname.startsWith('/api/backoffice/admin')) {
-    if (!event.locals.user || event.locals.user.role !== 'admin') {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'content-type': 'application/json' },
-      });
-    }
-  }
-
-  if (pathname.startsWith('/api/backoffice/parish')) {
-    if (!event.locals.user || event.locals.user.role !== 'parish') {
+  // API routes protection - all backoffice API routes just need authentication
+  if (pathname.startsWith('/api/backoffice')) {
+    if (!event.locals.user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'content-type': 'application/json' },

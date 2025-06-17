@@ -1,5 +1,4 @@
-import type { PageLoad } from './$types';
-import type { InitiativeWithTags } from '../../../api/backoffice/parish/initiatives/+server';
+import type { InitiativeWithTags } from '../../api/backoffice/parish/initiatives/+server';
 import type { Parish } from '$lib/server/database';
 import { error, redirect } from '@sveltejs/kit';
 import type { User } from '$lib/auth';
@@ -10,13 +9,13 @@ export interface ParishDashboardData {
 	user: User;
 }
 
-export const load: PageLoad = async ({ fetch, parent }) => {
+export const load = async ({ fetch, parent }) => {
 	try {
 		// Get parent data to check authentication
 		const { user } = await parent();
 
-		// Check if user is authenticated and is a parish user
-		if (!user || user.role !== 'parish') {
+		// Check if user is authenticated (no role restriction)
+		if (!user) {
 			throw redirect(302, '/login');
 		}
 

@@ -1,7 +1,7 @@
 import type { PageLoad } from './$types';
-import type { Initiative, Parish } from '$lib/server/database';
+import type { Initiative, Parish, User } from '$lib/server/database';
 import { error, redirect } from '@sveltejs/kit';
-import type { User } from '$lib/auth';
+import type { User as AuthUser } from '$lib/auth';
 
 export interface AdminInitiativeWithDetails extends Initiative {
 	parish_name: string;
@@ -26,7 +26,9 @@ export interface AdminDashboardStats {
 export interface AdminDashboardData {
 	stats: AdminDashboardStats;
 	recentInitiatives: AdminInitiativeWithDetails[];
-	user: User;
+	users: User[];
+	parishes: Parish[];
+	user: AuthUser;
 }
 
 export const load: PageLoad = async ({ fetch, parent }) => {
@@ -34,15 +36,16 @@ export const load: PageLoad = async ({ fetch, parent }) => {
 		// Get parent data to check authentication
 		const { user } = await parent();
 
-		// Check if user is authenticated and is an admin user
-		if (!user || user.role !== 'admin') {
+		// Check if user is authenticated (no role restriction)
+		if (!user) {
 			throw redirect(302, '/login');
 		}
 
-		// Fetch initiatives and parishes data in parallel
-		const [initiativesResponse, parishesResponse] = await Promise.all([
+		// Fetch initiatives, parishes, and users data in parallel
+		const [initiativesResponse, parishesResponse, usersResponse] = await Promise.all([
 			fetch('/api/backoffice/admin/initiatives'),
 			fetch('/api/parishes'),
+			fetch('/api/admin/users'),
 		]);
 
 		if (!initiativesResponse.ok) {
@@ -56,8 +59,13 @@ export const load: PageLoad = async ({ fetch, parent }) => {
 			throw error(parishesResponse.status, `Failed to load parishes: ${parishesResponse.statusText}`);
 		}
 
+		if (!usersResponse.ok) {
+			throw error(usersResponse.status, `Failed to load users: ${usersResponse.statusText}`);
+		}
+
 		const initiatives: AdminInitiativeWithDetails[] = await initiativesResponse.json();
 		const parishes: Parish[] = await parishesResponse.json();
+		const users: User[] = await usersResponse.json();
 
 		// Calculate statistics
 		const stats: AdminDashboardStats = {
@@ -65,7 +73,7 @@ export const load: PageLoad = async ({ fetch, parent }) => {
 			approvedInitiatives: initiatives.filter(i => i.status === 'approved').length,
 			pendingInitiatives: initiatives.filter(i => i.status === 'submitted').length,
 			totalParishes: parishes.length,
-			totalUsers: 0, // This would need a separate endpoint for user count
+			totalUsers: users.length,
 		};
 
 		// Get recent initiatives (first 5)
@@ -74,6 +82,8 @@ export const load: PageLoad = async ({ fetch, parent }) => {
 		return {
 			stats,
 			recentInitiatives,
+			users,
+			parishes,
 			user,
 		} satisfies AdminDashboardData;
 	} catch (err) {

@@ -8,9 +8,8 @@
 	} from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { getTagClasses } from '$lib/colors';
-	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data } = $props();
 
 	let initiative = data.initiative;
 

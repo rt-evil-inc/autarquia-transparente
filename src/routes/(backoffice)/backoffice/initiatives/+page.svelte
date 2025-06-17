@@ -4,9 +4,8 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { getTagClasses } from '$lib/colors';
-	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data } = $props();
 
 	let searchTerm = $state('');
 	let statusFilter = $state('');
@@ -63,28 +62,6 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
-	<!-- Header -->
-	<header class="bg-white shadow">
-		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-			<div class="flex h-16 justify-between items-center">
-				<div class="flex items-center space-x-4">
-					<Button variant="outline" onclick={() => goto('/backoffice/parish')}>
-						← Dashboard
-					</Button>
-					<h1 class="text-xl font-semibold text-gray-900">Minhas Iniciativas</h1>
-				</div>
-				<div class="flex items-center space-x-4">
-					<Button onclick={() => goto('/backoffice/parish/initiatives/new')}>
-						+ Nova Iniciativa
-					</Button>
-					<span class="text-sm text-gray-700">
-						{data.user?.email}
-					</span>
-				</div>
-			</div>
-		</div>
-	</header>
-
 	<!-- Main Content -->
 	<main class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
 		<div class="px-4 py-6 sm:px-0">

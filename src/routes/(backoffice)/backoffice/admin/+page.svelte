@@ -2,16 +2,63 @@
 	import { goto } from '$app/navigation';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import type { PageData } from './$types';
+	import { Input } from '$lib/components/ui/input/index.js';
+	import { Label } from '$lib/components/ui/label/index.js';
 
-	export let data: PageData;
+	let { data } = $props();
 
-	async function logout() {
+	// User management state
+	let newUserEmail = $state('');
+	let newUserPassword = $state('');
+	let newUserRole = $state('parish');
+	let newUserParishId = $state('');
+	let isCreatingUser = $state(false);
+
+	// Use data from load function
+	let recentInitiatives = data.recentInitiatives;
+	let users = data.users;
+	let parishes = data.parishes;
+
+	async function createUser() {
+		if (!newUserEmail || !newUserPassword || !newUserRole) {
+			alert('Por favor, preencha todos os campos obrigatórios.');
+			return;
+		}
+
+		isCreatingUser = true;
+
 		try {
-			await fetch('/api/auth/logout', { method: 'POST' });
-			goto('/login');
+			const response = await fetch('/api/admin/users', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					email: newUserEmail,
+					password: newUserPassword,
+					role: newUserRole,
+					parish_id: newUserParishId ? parseInt(newUserParishId) : undefined,
+				}),
+			});
+
+			if (response.ok) {
+				// Reset form
+				newUserEmail = '';
+				newUserPassword = '';
+				newUserRole = 'parish';
+				newUserParishId = '';
+
+				// Refresh the page to show the new user
+				window.location.reload();
+			} else {
+				const errorData = await response.json();
+				alert(`Erro ao criar utilizador: ${errorData.error}`);
+			}
 		} catch (error) {
-			console.error('Logout error:', error);
+			console.error('Error creating user:', error);
+			alert('Erro ao criar utilizador. Tente novamente.');
+		} finally {
+			isCreatingUser = false;
 		}
 	}
 
@@ -32,9 +79,16 @@
 		}
 	}
 
-	// Use data from load function
-	$: stats = data.stats;
-	$: recentInitiatives = data.recentInitiatives;
+	function getRoleBadge(role: string) {
+		switch (role) {
+			case 'admin':
+				return 'bg-blue-100 text-blue-800';
+			case 'parish':
+				return 'bg-green-100 text-green-800';
+			default:
+				return 'bg-gray-100 text-gray-800';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -42,50 +96,6 @@
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
-	<!-- Header -->
-	<header class="bg-white shadow">
-		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-			<div class="flex h-16 justify-between items-center">
-				<div class="flex items-center">
-					<h1 class="text-xl font-semibold text-gray-900">
-						Portal do Autarca - Administração
-					</h1>
-				</div>
-				<div class="flex items-center space-x-4">
-					<span class="text-sm text-gray-700">
-						{data.user?.email}
-					</span>
-					<Button variant="outline" onclick={logout}>
-						Sair
-					</Button>
-				</div>
-			</div>
-		</div>
-	</header>
-
-	<!-- Navigation -->
-	<nav class="bg-blue-600">
-		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-			<div class="flex space-x-8">
-				<a href="/backoffice/admin" class="border-b-2 border-blue-300 py-4 px-1 text-sm font-medium text-white">
-					Dashboard
-				</a>
-				<a href="/backoffice/admin/initiatives" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-blue-100 hover:border-blue-300 hover:text-white">
-					Iniciativas
-				</a>
-				<a href="/backoffice/admin/parishes" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-blue-100 hover:border-blue-300 hover:text-white">
-					Freguesias
-				</a>
-				<a href="/backoffice/admin/users" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-blue-100 hover:border-blue-300 hover:text-white">
-					Utilizadores
-				</a>
-				<a href="/backoffice/admin/tags" class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-blue-100 hover:border-blue-300 hover:text-white">
-					Tags
-				</a>
-			</div>
-		</div>
-	</nav>
-
 	<!-- Main Content -->
 	<main class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
 		<div class="px-4 py-6 sm:px-0">
@@ -93,90 +103,119 @@
 				Dashboard
 			</h2>
 
-			<!-- Statistics -->
-			<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+			<!-- User Management Section -->
+			<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 h-96">
+				<!-- Create New User -->
 				<Card>
-					<CardContent class="p-6">
-						<div class="text-2xl font-bold text-gray-900">{stats.totalInitiatives}</div>
-						<div class="text-sm text-gray-600">Total de Iniciativas</div>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardContent class="p-6">
-						<div class="text-2xl font-bold text-green-600">{stats.approvedInitiatives}</div>
-						<div class="text-sm text-gray-600">Aprovadas</div>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardContent class="p-6">
-						<div class="text-2xl font-bold text-yellow-600">{stats.pendingInitiatives}</div>
-						<div class="text-sm text-gray-600">Pendentes</div>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardContent class="p-6">
-						<div class="text-2xl font-bold text-blue-600">{stats.totalParishes}</div>
-						<div class="text-sm text-gray-600">Freguesias</div>
-					</CardContent>
-				</Card>
-			</div>
-
-			<!-- Recent Initiatives -->
-			<Card>
-				<CardHeader>
-					<CardTitle>Iniciativas Recentes</CardTitle>
-					<CardDescription>
-						As 5 iniciativas mais recentes no sistema
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					{#if recentInitiatives.length === 0}
-						<p class="text-gray-500">Nenhuma iniciativa encontrada.</p>
-					{:else}
-						<div class="space-y-4">								{#each recentInitiatives as initiative (initiative.id)}
-							<div class="flex items-center justify-between p-4 border rounded-lg">
-								<div class="flex-1">
-									<h4 class="font-medium text-gray-900">{initiative.title}</h4>
-									<p class="text-sm text-gray-600">{initiative.parish_name}</p>
-									<p class="text-xs text-gray-500">Criado em {formatDate(initiative.created_at)}</p>
-								</div>
-								<div class="flex items-center space-x-2">
-									<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {getStatusBadge(initiative.status)}">
-										{initiative.status === 'approved' ? 'Aprovada' :
-											initiative.status === 'submitted' ? 'Pendente' :
-												initiative.status === 'rejected' ? 'Rejeitada' : 'Rascunho'}
-									</span>
-									<Button variant="outline" size="sm" onclick={() => goto(`/backoffice/admin/initiatives/${initiative.id}`)}>
-										Ver
-									</Button>
-								</div>
+					<CardHeader>
+						<CardTitle>Criar Novo Utilizador</CardTitle>
+						<CardDescription>
+							Adicionar um novo utilizador ao sistema
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<form onsubmit={e => { e.preventDefault(); createUser(); }} class="space-y-4">
+							<div>
+								<Label for="email">Email</Label>
+								<Input
+									id="email"
+									type="email"
+									bind:value={newUserEmail}
+									placeholder="utilizador@example.com"
+									required
+								/>
 							</div>
-						{/each}
-						</div>
-					{/if}
-				</CardContent>
-			</Card>
 
-			<!-- Quick Actions -->
-			<div class="mt-8">
-				<h3 class="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-					<Button variant="outline" onclick={() => goto('/backoffice/admin/parishes')} class="h-20">
-						<div class="text-center">
-							<div class="text-sm font-medium">Gerir Freguesias</div>
-							<div class="text-xs text-gray-500">Adicionar ou editar freguesias</div>
-						</div>
-					</Button>
+							<div>
+								<Label for="password">Password</Label>
+								<Input
+									id="password"
+									type="password"
+									bind:value={newUserPassword}
+									placeholder="••••••••"
+									required
+								/>
+							</div>
 
-					<Button variant="outline" onclick={() => goto('/backoffice/admin/users')} class="h-20">
-						<div class="text-center">
-							<div class="text-sm font-medium">Gerir Utilizadores</div>
-							<div class="text-xs text-gray-500">Contas de freguesia e admin</div>
-						</div>
-					</Button>
+							<div>
+								<Label for="role">Função</Label>
+								<select
+									id="role"
+									bind:value={newUserRole}
+									class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+								>
+									<option value="parish">Freguesia</option>
+									<option value="admin">Administrador</option>
+								</select>
+							</div>
 
-				</div>
+							{#if newUserRole === 'parish'}
+								<div>
+									<Label for="parish">Freguesia (opcional)</Label>
+									<select
+										id="parish"
+										bind:value={newUserParishId}
+										class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+									>
+										<option value="">Selecionar freguesia...</option>
+										{#each parishes as parish (parish.id)}
+											<option value={parish.id}>{parish.name}</option>
+										{/each}
+									</select>
+								</div>
+							{/if}
+
+							<Button type="submit" class="w-full" disabled={isCreatingUser}>
+								{isCreatingUser ? 'A criar...' : 'Criar Utilizador'}
+							</Button>
+						</form>
+					</CardContent>
+				</Card>
+
+				<!-- Users List -->
+				<Card>
+					<CardHeader>
+						<CardTitle>Utilizadores Existentes</CardTitle>
+						<CardDescription>
+							Lista de todos os utilizadores no sistema
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						{#if users.length === 0}
+							<p class="text-gray-500">Nenhum utilizador encontrado.</p>
+						{:else}
+							<div class="space-y-3 h-96 overflow-y-auto">
+								{#each users as user (user.id)}
+									<div class="flex items-center justify-between p-3 border rounded-lg">
+										<div class="flex-1">
+											<h4 class="font-medium text-gray-900">{user.email}</h4>
+											<div class="flex items-center space-x-2 mt-1">
+												<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {getRoleBadge(user.role)}">
+													{user.role === 'admin' ? 'Administrador' : 'Freguesia'}
+												</span>
+												{#if user.parish_id}
+													{@const parish = parishes.find(p => p.id === user.parish_id)}
+													{#if parish}
+														<span class="text-xs text-gray-500">
+															{parish.name}
+														</span>
+													{/if}
+												{/if}
+											</div>
+											{#if user.created_at}
+												<p class="text-xs text-gray-500 mt-1">
+													Criado em {formatDate(user.created_at)}
+												</p>
+											{/if}
+										</div>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</CardContent>
+				</Card>
 			</div>
+
 		</div>
 	</main>
 </div>

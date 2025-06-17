@@ -10,33 +10,31 @@ export type InitiativeWithTags = Initiative & {
 };
 
 export const GET: RequestHandler = async ({ locals }) => {
-	if (!locals.user?.parish_id) {
-		error(400, { message: 'Parish ID not found' });
+	if (!locals.user) {
+		error(401, { message: 'Authentication required' });
 	}
 
-	const initiatives = queries.getInitiativesByParish(locals.user.parish_id);
-
-	// Filter to only show initiatives created by this user
-	const userInitiatives = initiatives.filter(initiative => initiative.created_by === locals.user!.id);
+	// Get all initiatives regardless of parish or creator
+	const initiatives = queries.getAllInitiatives();
 
 	// Get tags for each initiative
-	const userInitiativesWithTags = userInitiatives.map(initiative => ({
+	const initiativesWithTags = initiatives.map(initiative => ({
 		...initiative,
 		tags: queries.getInitiativeTags(initiative.id),
 	}));
 
-  userInitiativesWithTags satisfies InitiativeWithTags[];
-  return json(userInitiativesWithTags);
+  initiativesWithTags satisfies InitiativeWithTags[];
+  return json(initiativesWithTags);
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		if (!locals.user?.parish_id) {
-			throw error(400, { message: 'Parish ID not found' });
+		if (!locals.user) {
+			throw error(401, { message: 'Authentication required' });
 		}
 
 		const contentType = request.headers.get('content-type') || '';
-		let title, description, content, category, tags, status, file;
+		let title, description, content, category, tags, status, file, parishId;
 
 		if (contentType.includes('multipart/form-data')) {
 			// Handle file upload
@@ -46,17 +44,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			content = formData.get('content') as string;
 			category = formData.get('category') as string;
 			status = formData.get('status') as string;
+			parishId = formData.get('parish_id') as string;
 			tags = formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [];
 			file = formData.get('document') as File;
 		} else {
 			// Handle JSON data
 			const data = await request.json();
-			({ title, description, content, category, tags, status } = data);
+			({ title, description, content, category, tags, status, parish_id: parishId } = data);
 		}
 
 		if (!title) {
 			throw error(400, { message: 'Title is required' });
 		}
+
+		// Use provided parish_id or user's parish_id as fallback
+		const targetParishId = parishId ? Number(parishId) : locals.user.parish_id || 1; // Default to parish 1 if no parish_id
 
 		// Validate status
 		const validStatuses = ['draft', 'submitted', 'approved'];
@@ -70,7 +72,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			title,
 			description,
 			content,
-			locals.user.parish_id,
+			targetParishId,
 			category || null,
 			locals.user.id,
 			initiativeStatus,

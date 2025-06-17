@@ -1,7 +1,7 @@
 import type { PageLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import type { ParishInitiativeResponse } from '../../../../../api/backoffice/parish/initiatives/[id]/+server';
-import type { TagsListResponse } from '../../../../../api/tags/+server';
+import type { ParishInitiativeResponse } from '../../../../api/backoffice/parish/initiatives/[id]/+server';
+import type { TagsListResponse } from '../../../../api/tags/+server';
 
 export const load: PageLoad = async ({ params, fetch }) => {
 	const id = params.id;
@@ -29,7 +29,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		tagsRes.json(),
 	]);
 
-	console.log('Loaded initiative:', initiative);
 	return {
 		initiative,
 		tags,

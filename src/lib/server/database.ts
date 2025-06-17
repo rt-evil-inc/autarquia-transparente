@@ -266,6 +266,7 @@ export async function seedDatabase() {
 }
 
 // Database query helpers - prepared statements
+const getAllUsersQuery = db.prepare<User, []>('SELECT id, email, role, parish_id, created_at FROM users ORDER BY created_at DESC');
 const getUserByEmailQuery = db.prepare<User, { $email: string }>('SELECT * FROM users WHERE email = $email');
 const getUserByIdQuery = db.prepare<User, { $id: number }>('SELECT * FROM users WHERE id = $id');
 const createUserQuery = db.prepare<null, { $email: string, $password_hash: string, $role: 'admin' | 'parish', $parish_id?: number }>('INSERT INTO users (email, password_hash, role, parish_id) VALUES ($email, $password_hash, $role, $parish_id)');
@@ -379,6 +380,10 @@ const getInitiativeDocumentQuery = db.prepare<InitiativeDocument, { $id: number 
 // Query functions
 export const queries = {
 	// User functions
+	getAllUsers: (): User[] => {
+		return getAllUsersQuery.all();
+	},
+
 	getUserByEmail: (email: string): User | null => {
 		return getUserByEmailQuery.get({ $email: email });
 	},
