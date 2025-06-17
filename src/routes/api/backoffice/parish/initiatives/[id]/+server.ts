@@ -86,7 +86,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	}
 
 	const contentType = request.headers.get('content-type') || '';
-	let title, description, content, category, tags, status, file;
+	let title, description, content, category, tags, status, votes, file;
 
 	if (contentType.includes('multipart/form-data')) {
 		// Handle file upload
@@ -97,11 +97,12 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		category = formData.get('category') as string;
 		status = formData.get('status') as string;
 		tags = formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [];
+		votes = formData.get('votes') ? JSON.parse(formData.get('votes') as string) : [];
 		file = formData.get('document') as File;
 	} else {
 		// Handle JSON data
 		const data = await request.json();
-		({ title, description, content, category, tags, status } = data);
+		({ title, description, content, category, tags, status, votes } = data);
 	}
 
 	if (!title) {
@@ -142,6 +143,23 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	if (tags && Array.isArray(tags) && tags.length > 0) {
 		for (const tagId of tags) {
 			queries.addInitiativeTag(Number(id), tagId);
+		}
+	}
+
+	// Update votes - clear existing and add new ones
+	if (votes && Array.isArray(votes)) {
+		queries.clearInitiativeVotes(Number(id));
+
+		for (const vote of votes) {
+			// Only add votes that have a voter name
+			if (vote.voter_name && vote.voter_name.trim()) {
+				queries.addVote(
+					Number(id),
+					vote.voter_name.trim(),
+					vote.vote,
+					vote.notes || undefined,
+				);
+			}
 		}
 	}
 

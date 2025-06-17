@@ -461,6 +461,34 @@ export const queries = {	// User functions
 			.all();
 	},
 
+	addVote: (initiative_id: number, voter_name: string, vote: 'favor' | 'against' | 'abstention', notes?: string): void => {
+		drizzleDb.insert(votes).values({
+			initiative_id,
+			voter_name,
+			vote,
+			notes,
+		}).run();
+	},
+
+	updateVote: (vote_id: number, voter_name: string, vote: 'favor' | 'against' | 'abstention', notes?: string): void => {
+		drizzleDb.update(votes)
+			.set({
+				voter_name,
+				vote,
+				notes,
+			})
+			.where(eq(votes.id, vote_id)).run();
+	},
+
+	deleteVote: (vote_id: number): void => {
+		drizzleDb.delete(votes)
+			.where(eq(votes.id, vote_id)).run();
+	},
+
+	clearInitiativeVotes: (initiative_id: number): void => {
+		drizzleDb.delete(votes)
+			.where(eq(votes.initiative_id, initiative_id)).run();
+	},
 	// Document functions
 	getInitiativeDocuments: (initiative_id: number): InitiativeDocument[] => {
 		return drizzleDb.select().from(initiative_documents)

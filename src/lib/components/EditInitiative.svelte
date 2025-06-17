@@ -3,16 +3,12 @@
 	import { TAG_COLORS, getTagClasses, getTagColorByName } from '$lib/colors';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
-	import * as Command from '$lib/components/ui/command/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
-	import { cn } from '$lib/utils.js';
-	import CheckIcon from '@lucide/svelte/icons/check';
-	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
-	import { tick } from 'svelte';
-	import type { FullInitiativeResponse } from '../../routes/api/initiatives/[id]/+server';
+	import * as Select from '$lib/components/ui/select/index.js';
 	import type { Tag } from '$lib/server/database';
+	import type { FullInitiativeResponse } from '../../routes/api/initiatives/[id]/+server';
+	import EditInitiativeVotes from './VoteEditor.svelte';
 
 	let { initiative, tags }:{initiative?: FullInitiativeResponse, tags: Tag[] } = $props();
 
@@ -26,6 +22,7 @@
 	let category = $state(initiative?.category ?? '');
 	let selectedTags: number[] = $state(initiative?.tags ?
 		initiative.tags.map(t => t.id) : []);
+	let votes = $state(initiative?.votes ? [...initiative.votes] : []);
 	let saving = $state(false);
 	let error = $state('');
 	let newTagName = $state('');
@@ -34,10 +31,6 @@
 	let creatingTag = $state(false);
 	let selectedFile: File | null = $state(null);
 	let fileInput: HTMLInputElement | null = $state(null);
-
-	// Category combobox state
-	let categoryOpen = $state(false);
-	let categoryTriggerRef = $state<HTMLButtonElement>(null!);
 
 	const categories = [
 		{ value: 'financas', label: 'Finanças' },
@@ -52,19 +45,21 @@
 		{ value: 'cultura', label: 'Cultura' },
 	];
 
-	const selectedCategoryLabel = $derived(
-		categories.find(c => c.value === category)?.label,
+	const voteOptions = [
+		{ value: 'favor', label: 'A Favor' },
+		{ value: 'against', label: 'Contra' },
+		{ value: 'abstention', label: 'Abstenção' },
+	];
+
+	// Derived values for Select components
+	const categoryTriggerContent = $derived(
+		categories.find(c => c.value === category)?.label ?? 'Selecione uma categoria',
 	);
 
-	// We want to refocus the trigger button when the user selects
-	// an item from the list so users can continue navigating the
-	// rest of the form with the keyboard.
-	function closeAndFocusCategoryTrigger() {
-		categoryOpen = false;
-		tick().then(() => {
-			categoryTriggerRef.focus();
-		});
-	}
+	// Get category label for saving
+	const selectedCategoryLabel = $derived(
+		categories.find(c => c.value === category)?.label || null,
+	);
 
 	async function saveInitiative(status: 'draft' | 'submitted' | 'approved' | 'rejected') {
 		if (!title.trim()) {
@@ -91,6 +86,7 @@
 				formData.append('category', selectedCategoryLabel || '');
 				formData.append('tags', JSON.stringify(selectedTags));
 				formData.append('status', status);
+				formData.append('votes', JSON.stringify(votes));
 				formData.append('document', selectedFile);
 
 				response = await fetch(url, {
@@ -111,6 +107,7 @@
 						category: selectedCategoryLabel || null,
 						tags: selectedTags,
 						status,
+						votes: votes,
 					}),
 				});
 			}
@@ -279,54 +276,24 @@
 					<!-- Category -->
 					<div class="space-y-2">
 						<Label for="category">Categoria</Label>
-						<Popover.Root bind:open={categoryOpen}>
-							<Popover.Trigger bind:ref={categoryTriggerRef}>
-								{#snippet child({ props })}
-									<Button
-										{...props}
-										variant="outline"
-										class="w-full justify-between"
-										role="combobox"
-										aria-expanded={categoryOpen}
-									>
-										{selectedCategoryLabel || 'Selecione uma categoria (opcional)'}
-										<ChevronsUpDownIcon class="opacity-50" />
-									</Button>
-								{/snippet}
-							</Popover.Trigger>
-							<Popover.Content class="w-full p-0">
-								<Command.Root>
-									<Command.Input placeholder="Procurar categoria..." />
-									<Command.List>
-										<Command.Empty>Nenhuma categoria encontrada.</Command.Empty>
-										<Command.Group>
-											<Command.Item
-												value=""
-												onSelect={() => {
-													category = '';
-													closeAndFocusCategoryTrigger();
-												}}
-											>
-												<CheckIcon class={cn(category !== '' && 'text-transparent')} />
-												Nenhuma categoria
-											</Command.Item>
-											{#each categories as cat (cat.value)}
-												<Command.Item
-													value={cat.value}
-													onSelect={() => {
-														category = cat.value;
-														closeAndFocusCategoryTrigger();
-													}}
-												>
-													<CheckIcon class={cn(category !== cat.value && 'text-transparent')} />
-													{cat.label}
-												</Command.Item>
-											{/each}
-										</Command.Group>
-									</Command.List>
-								</Command.Root>
-							</Popover.Content>
-						</Popover.Root>
+						<Select.Root type="single" name="category" bind:value={category}>
+							<Select.Trigger class="w-full">
+								{selectedCategoryLabel || 'Selecione uma categoria (opcional)'}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Group>
+									<Select.Label>Categorias</Select.Label>
+									<Select.Item value="" label="Nenhuma categoria">
+										Nenhuma categoria
+									</Select.Item>
+									{#each categories as cat (cat.value)}
+										<Select.Item value={cat.value} label={cat.label}>
+											{cat.label}
+										</Select.Item>
+									{/each}
+								</Select.Group>
+							</Select.Content>
+						</Select.Root>
 					</div>
 
 					<!-- Tags -->
@@ -514,6 +481,11 @@
 
 						</div>
 					</div>
+
+					<!-- Votes Section (Edit Mode) -->
+					{#if isEditMode}
+						<EditInitiativeVotes bind:votes={votes} {saving} />
+					{/if}
 
 					<!-- Actions -->
 					<div class="flex justify-between pt-6">
