@@ -324,15 +324,30 @@
 									</div>
 									<div>
 										<Label for="newTagColor" class="text-sm">Cor</Label>
-										<select
-											id="newTagColor"
-											bind:value={newTagColor}
-											class="w-full h-9 px-3 rounded border border-gray-300 bg-white text-sm"
-										>
-											{#each TAG_COLORS as color (color.name)}
-												<option value={color.name}>{color.label}</option>
-											{/each}
-										</select>
+										<Select.Root type="single" name="newTagColor" bind:value={newTagColor}>
+											<Select.Trigger class="w-full">
+												<div class="flex items-center gap-2">
+													<div class="w-4 h-4 rounded" style="background-color: {getTagColorByName(newTagColor)?.hex || '#3B82F6'}"></div>
+													{getTagColorByName(newTagColor)?.label || 'Selecione uma cor'}
+												</div>
+											</Select.Trigger>
+											<Select.Content>
+												<Select.Group>
+													<Select.Label>Cores</Select.Label>
+													{#each TAG_COLORS as color (color.name)}
+														<Select.Item
+															value={color.name}
+															label={color.label}
+														>
+															<div class="flex items-center gap-2">
+																<div class="w-4 h-4 rounded" style="background-color: {color.hex}"></div>
+																{color.label}
+															</div>
+														</Select.Item>
+													{/each}
+												</Select.Group>
+											</Select.Content>
+										</Select.Root>
 									</div>
 								</div>
 
