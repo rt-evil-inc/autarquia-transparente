@@ -1,6 +1,7 @@
 import type { PageLoad } from './$types';
-import type { Initiative, Parish, User } from '$lib/server/database';
+import type { Initiative, Parish } from '$lib/server/database';
 import { error, redirect } from '@sveltejs/kit';
+import type { User } from '$lib/auth';
 
 export interface AdminInitiativeWithDetails extends Initiative {
 	parish_name: string;

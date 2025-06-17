@@ -1,6 +1,7 @@
 import type { PageLoad } from './$types';
-import type { FullInitiative, Tag, User } from '$lib/server/database';
+import type { FullInitiative, Tag } from '$lib/server/database';
 import { error, redirect } from '@sveltejs/kit';
+import type { User } from '$lib/auth';
 
 export interface ParishInitiativeEditData {
 	initiative: FullInitiative;

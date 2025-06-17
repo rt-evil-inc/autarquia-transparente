@@ -1,7 +1,8 @@
 import type { PageLoad } from './$types';
 import type { InitiativeWithTags } from '../../../api/backoffice/parish/initiatives/+server';
-import type { Parish, User } from '$lib/server/database';
+import type { Parish } from '$lib/server/database';
 import { error, redirect } from '@sveltejs/kit';
+import type { User } from '$lib/auth';
 
 export interface ParishDashboardData {
 	initiatives: InitiativeWithTags[];

@@ -95,7 +95,7 @@
 				}
 				// Clear the selected file after successful upload
 				selectedFile = null;
-				if (fileInput) fileInput.value = '';
+				fileInput.value = '';
 			} else {
 				const data = await response.json();
 				error = data.error || 'Erro ao atualizar iniciativa';
