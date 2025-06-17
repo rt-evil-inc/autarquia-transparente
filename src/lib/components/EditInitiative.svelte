@@ -512,6 +512,7 @@
 								</div>
 							{/if}
 
+						</div>
 					</div>
 
 					<!-- Actions -->
