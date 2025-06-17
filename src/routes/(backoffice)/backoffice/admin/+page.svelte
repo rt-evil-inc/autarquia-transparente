@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
@@ -15,7 +14,6 @@
 	let isCreatingUser = $state(false);
 
 	// Use data from load function
-	let recentInitiatives = data.recentInitiatives;
 	let users = data.users;
 	let parishes = data.parishes;
 
@@ -64,19 +62,6 @@
 
 	function formatDate(dateStr: string | Date) {
 		return new Date(dateStr).toLocaleDateString('pt-PT');
-	}
-
-	function getStatusBadge(status: string) {
-		switch (status) {
-			case 'approved':
-				return 'bg-green-100 text-green-800';
-			case 'submitted':
-				return 'bg-yellow-100 text-yellow-800';
-			case 'rejected':
-				return 'bg-red-100 text-red-800';
-			default:
-				return 'bg-gray-100 text-gray-800';
-		}
 	}
 
 	function getRoleBadge(role: string) {

@@ -1,4 +1,5 @@
 import type { InitiativeWithTags } from '../../../api/backoffice/parish/initiatives/+server';
+import type { TagsListResponse } from '../../../api/tags/+server';
 import type { PageLoad } from './$types';
 import { error, redirect } from '@sveltejs/kit';
 
@@ -26,11 +27,19 @@ export interface ParishInitiative {
 
 export interface ParishInitiativesData {
   initiatives: InitiativeWithTags[];
+	tags: TagsListResponse;
 }
 
 export const load: PageLoad = async ({ fetch, parent }) => {
 	// Get parent data to check authentication
 	const { user } = await parent();
+		const tagsRes = await fetch('/api/tags');
+
+	if (!tagsRes.ok) {
+		error(500, 'Failed to load tags');
+	}
+
+	const tags: TagsListResponse = await tagsRes.json();
 
 	// Check if user is authenticated (no role restriction)
 	if (!user) {
@@ -50,6 +59,7 @@ export const load: PageLoad = async ({ fetch, parent }) => {
 	const initiatives: InitiativeWithTags[] = await response.json();
 
 	return {
+		tags,
 		initiatives,
 	} satisfies ParishInitiativesData;
 };

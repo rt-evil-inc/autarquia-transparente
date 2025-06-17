@@ -30,7 +30,7 @@ export type Tag = {
   id: number;
   name: string;
   color: string;
-  created_at?: Date; //
+  created_at: Date;
 }
 
 export type Initiative = {
@@ -61,7 +61,7 @@ export type InitiativeDocument = {
   file_path: string;
   file_size: number;
   mime_type: string;
-  uploaded_at?: Date; // Optional for non-authenticated users
+  uploaded_at: Date;
 }
 export type InitiativeTag = {
   initiative_id: number;

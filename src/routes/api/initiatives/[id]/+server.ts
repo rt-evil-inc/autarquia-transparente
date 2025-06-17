@@ -1,27 +1,24 @@
-import type { RequestHandler } from "@sveltejs/kit";
-import { json } from "@sveltejs/kit";
-import { queries, type FullInitiative } from "$lib/server/database";
-
-export type InitiativeDetailResponse = FullInitiative;
+import type { RequestHandler } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
+import { queries, type Initiative, type InitiativeDocument, type Tag, type Vote } from '$lib/server/database';
+export type FullInitiativeResponse = Initiative & {
+  tags: Tag[];
+  votes: Vote[];
+  documents: InitiativeDocument[];
+}
 
 export const GET: RequestHandler = async ({ params }) => {
-  try {
-    const { id } = params;
-    
-    if (!id || isNaN(Number(id))) {
-      return json({ error: "Invalid initiative ID" }, { status: 400 });
-    }
-    
-    const fullInitiative = queries.getFullInitiativeById(Number(id));
+  const { id } = params;
 
-    
-    if (!fullInitiative || fullInitiative.status === "draft") {
-      return json({ error: "Initiative not found" }, { status: 404 });
-    }
-    
-    return json(fullInitiative);
-  } catch (error) {
-    console.error("Error fetching initiative:", error);
-    return json({ error: "Internal server error" }, { status: 500 });
+  if (!id || isNaN(Number(id))) {
+    error(400, 'Invalid initiative ID');
   }
+
+  const fullInitiative = queries.getFullInitiativeById(Number(id));
+
+  if (!fullInitiative || fullInitiative.status === 'draft') {
+    error(404, 'Initiative not found');
+  }
+
+  return json(fullInitiative);
 };

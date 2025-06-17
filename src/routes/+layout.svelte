@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
+	import { goto } from '$app/navigation';
 
 	let { children, data } = $props();
 
@@ -45,7 +46,7 @@
 						{#if data.user}
 							<!-- Minhas Iniciativas Menu -->
 							<NavigationMenu.Item>
-								<NavigationMenu.Trigger>Minhas Iniciativas</NavigationMenu.Trigger>
+								<NavigationMenu.Trigger onclick={() => { goto('/backoffice'); }}>Minhas Iniciativas</NavigationMenu.Trigger>
 								<NavigationMenu.Content>
 									<ul class="grid w-[200px] gap-2 p-2">
 										<li>
