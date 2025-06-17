@@ -20,7 +20,7 @@ export const load = async ({ fetch, parent }) => {
 		}
 
 		// Fetch initiatives data
-		const initiativesResponse = await fetch('/api/backoffice/parish/initiatives');
+		const initiativesResponse = await fetch('/api/initiatives');
 
 		if (!initiativesResponse.ok) {
 			if (initiativesResponse.status === 401) {

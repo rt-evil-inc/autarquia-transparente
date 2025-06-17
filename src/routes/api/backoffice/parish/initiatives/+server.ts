@@ -9,24 +9,6 @@ export type InitiativeWithTags = Initiative & {
   tags: { id: number; name: string }[];
 };
 
-export const GET: RequestHandler = async ({ locals }) => {
-	if (!locals.user) {
-		error(401, { message: 'Authentication required' });
-	}
-
-	// Get all initiatives regardless of parish or creator
-	const initiatives = queries.getAllInitiatives();
-
-	// Get tags for each initiative
-	const initiativesWithTags = initiatives.map(initiative => ({
-		...initiative,
-		tags: queries.getInitiativeTags(initiative.id),
-	}));
-
-  initiativesWithTags satisfies InitiativeWithTags[];
-  return json(initiativesWithTags);
-};
-
 export const POST: RequestHandler = async ({ request, locals }) => {
   if (!locals.user) {
     error(401, { message: 'Authentication required' });

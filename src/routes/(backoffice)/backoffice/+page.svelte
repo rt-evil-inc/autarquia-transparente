@@ -69,9 +69,6 @@
 								Todas as iniciativas criadas por esta freguesia
 							</CardDescription>
 						</div>
-						<Button onclick={() => goto('/backoffice/initiatives')}>
-							Ver Todas
-						</Button>
 					</div>
 				</CardHeader>
 				<CardContent>

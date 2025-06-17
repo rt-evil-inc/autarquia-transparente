@@ -51,29 +51,6 @@ export interface ParishInitiativeResponse {
   votes: Vote[];
 }
 
-export const GET: RequestHandler = async ({ params, locals }) => {
-	const { id } = params;
-
-	if (!id || isNaN(Number(id))) {
-		error(400, { message: 'Invalid initiative ID' });
-	}
-
-	if (!locals.user) {
-		error(401, { message: 'Authentication required' });
-	}
-
-	// Get the initiative with all related data using the getFullInitiativeById function
-	const initiative = queries.getFullInitiativeById(Number(id));
-
-	if (!initiative) {
-		error(404, { message: 'Initiative not found' });
-	}
-
-	// No ownership verification - anyone can view any initiative
-
-	return json(initiative);
-};
-
 export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	const { id } = params;
 
