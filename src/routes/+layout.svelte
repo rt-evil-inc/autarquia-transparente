@@ -50,12 +50,6 @@
 								<NavigationMenu.Content>
 									<ul class="grid w-[200px] gap-2 p-2">
 										<li>
-											<NavigationMenu.Link href="/backoffice">
-												<div class="font-medium">Ver</div>
-												<div class="text-muted-foreground text-sm">
-													Ver todas as suas iniciativas
-												</div>
-											</NavigationMenu.Link>
 											<NavigationMenu.Link href="/backoffice/initiatives/new">
 												<div class="font-medium">Nova</div>
 												<div class="text-muted-foreground text-sm">
