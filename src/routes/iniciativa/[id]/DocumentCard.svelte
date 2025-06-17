@@ -20,7 +20,7 @@
 		});
 	}
 
-	function getVoteResults(votes: any[]) {
+	function getVoteResults(votes: { vote: 'favor' | 'against' | 'abstention' }[]) {
 		const results = {
 			favor: votes.filter(v => v.vote === 'favor').length,
 			against: votes.filter(v => v.vote === 'against').length,
