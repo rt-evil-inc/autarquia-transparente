@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Tag from '$lib/components/Tag.svelte';
+	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import {
 		Card,
 		CardContent,
@@ -7,23 +9,19 @@
 		CardHeader,
 		CardTitle,
 	} from '$lib/components/ui/card/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import Tag from '$lib/components/Tag.svelte';
+	import { Input } from '$lib/components/ui/input/index.js';
 
 	let { data } = $props();
 
-	// Extract data from props
-	let initiatives = data.initiatives;
-	let parishes = data.parishes;
-	let tags = data.tags;
+	let initiatives = $derived(data.initiatives);
+	let parishes = $derived(data.parishes);
+	let tags = $derived(data.tags);
 
-	// Current filter values (bound to form inputs)
-	let searchTerm = $state(data.filters.searchTerm);
-	let selectedParish = $state(data.filters.selectedParish);
-	let selectedCategory = $state(data.filters.selectedCategory);
-	let selectedTag = $state(data.filters.selectedTag);
+	let searchTerm = $derived(data.filters.searchTerm);
+	let selectedParish = $derived(data.filters.selectedParish);
+	let selectedCategory = $derived(data.filters.selectedCategory);
+	let selectedTag = $derived(data.filters.selectedTag);
 
 	const categories = [
 		'Finanças',
@@ -47,6 +45,12 @@
 
 	function handleSearch(event: Event) {
 		event.preventDefault();
+		console.log('Performing search with params:', {
+			searchTerm,
+			selectedParish,
+			selectedCategory,
+			selectedTag,
+		});
 		performSearch();
 	}
 
