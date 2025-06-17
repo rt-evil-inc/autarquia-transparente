@@ -1,42 +1,42 @@
-import type { RequestHandler } from "@sveltejs/kit";
-import { authenticateUser, generateToken } from "$lib/auth.js";
-import { json } from "@sveltejs/kit";
+import type { RequestHandler } from '@sveltejs/kit';
+import { authenticateUser, generateToken } from '$lib/auth.js';
+import { json } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
   try {
     const { email, password } = await request.json();
-    
+
     if (!email || !password) {
-      return json({ error: "Email and password are required" }, { status: 400 });
+      return json({ error: 'Email and password are required' }, { status: 400 });
     }
-    
+
     const user = await authenticateUser(email, password);
-    
+
     if (!user) {
-      return json({ error: "Invalid credentials" }, { status: 401 });
+      return json({ error: 'Invalid credentials' }, { status: 401 });
     }
-    
+
     const token = generateToken(user);
-    
+
     // Set HTTP-only cookie
-    cookies.set("auth-token", token, {
+    cookies.set('auth-token', token, {
       httpOnly: true,
       secure: false, // Set to true in production with HTTPS
-      sameSite: "strict",
+      sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/"
+      path: '/',
     });
-    
-    return json({ 
+
+    return json({
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
-        parish_id: user.parish_id
-      }
+        parish_id: user.parish_id,
+      },
     });
   } catch (error) {
-    console.error("Login error:", error);
-    return json({ error: "Internal server error" }, { status: 500 });
+    console.error('Login error:', error);
+    return json({ error: 'Internal server error' }, { status: 500 });
   }
 };

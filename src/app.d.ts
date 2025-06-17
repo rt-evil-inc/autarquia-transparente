@@ -7,7 +7,7 @@ declare global {
 			user?: {
 				id: number;
 				email: string;
-				role: "admin" | "parish";
+				role: 'admin' | 'parish';
 				parish_id?: number;
 				is_active: boolean;
 			};

@@ -20,27 +20,6 @@
 		});
 	}
 
-	function getVoteResults(votes: { vote: 'favor' | 'against' | 'abstention' }[]) {
-		const results = {
-			favor: votes.filter(v => v.vote === 'favor').length,
-			against: votes.filter(v => v.vote === 'against').length,
-			abstention: votes.filter(v => v.vote === 'abstention').length,
-		};
-
-		const total = results.favor + results.against + results.abstention;
-
-		return {
-			...results,
-			total,
-			favorPercent: total > 0 ? Math.round((results.favor / total) * 100) : 0,
-			againstPercent:
-				total > 0 ? Math.round((results.against / total) * 100) : 0,
-			abstentionPercent:
-				total > 0 ? Math.round((results.abstention / total) * 100) : 0,
-		};
-	}
-
-	let voteResults = initiative?.votes ? getVoteResults(initiative.votes) : null;
 </script>
 
 <Card>

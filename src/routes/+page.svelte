@@ -10,7 +10,6 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { getTagClasses } from '$lib/colors';
 	import Tag from '$lib/components/Tag.svelte';
 
 	let { data } = $props();
