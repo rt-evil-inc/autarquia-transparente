@@ -1,9 +1,12 @@
 import { Database } from 'bun:sqlite';
 import bcrypt from 'bcrypt';
 import fs from 'fs';
+import { drizzle } from 'drizzle-orm/bun-sqlite';
 
 // Initialize database with strict mode
 export const db = new Database('portal-autarca.db');
+
+export const drizzleDb = drizzle(process.env.DB_FILE_NAME!);
 
 // Enable foreign keys
 db.exec('PRAGMA foreign_keys = ON');
