@@ -1,0 +1,22 @@
+{
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
+	"eslint.validate": ["javascript", "svelte"],
+	"eslint.options": {
+	},
+	"editor.defaultFormatter": "dbaeumer.vscode-eslint",
+	"eslint.format.enable": true,
+	"svelte.plugin.svelte.format.enable": false,
+	"editor.tabSize": 2,
+	"[html]": {
+		"editor.defaultFormatter": "vscode.html-language-features"
+	},
+	"files.eol": "\n",
+	"[json]": {
+		"editor.defaultFormatter": "vscode.json-language-features"
+	},
+	"[svelte]": {
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint"
+	},
+}
