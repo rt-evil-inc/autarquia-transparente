@@ -50,7 +50,9 @@
 							</div>
 						</div>
 					</div>
-					<Button variant="outline" size="sm">Descarregar</Button>
+					<a href="/uploads/{doc.filename}" target="_blank">
+						<Button variant="outline" size="sm">Descarregar</Button>
+					</a>
 				</div>
 			{/each}
 		</div>
