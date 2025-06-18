@@ -1,7 +1,15 @@
 <script lang="ts">
-	import '../app.css';
-	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
 	import { goto, invalidateAll } from '$app/navigation';
+	import * as Drawer from '$lib/components/ui/drawer/index.js';
+	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
+	import EditIcon from '@lucide/svelte/icons/edit';
+	import FileTextIcon from '@lucide/svelte/icons/file-text';
+	import LogInIcon from '@lucide/svelte/icons/log-in';
+	import LogOutIcon from '@lucide/svelte/icons/log-out';
+	import PlusIcon from '@lucide/svelte/icons/plus';
+	import SettingsIcon from '@lucide/svelte/icons/settings';
+	import UsersIcon from '@lucide/svelte/icons/users';
+	import '../app.css';
 
 	let { children, data } = $props();
 	let mobileMenuOpen = $state(false);
@@ -15,19 +23,21 @@
 		});
 		goto('/');
 		invalidateAll();
-	}
-
-	function toggleMobileMenu() {
-		mobileMenuOpen = !mobileMenuOpen;
+		closeMobileMenu();
 	}
 
 	function closeMobileMenu() {
 		mobileMenuOpen = false;
 	}
+
+	function handleMobileNavigation(url: string) {
+		goto(url);
+		closeMobileMenu();
+	}
 </script>
 
 <!-- Modern Header with Menubar -->
-<header class="border-b bg-white shadow-sm">
+<header class="sticky top-0 z-50 border-b bg-white shadow-sm">
 	<div class="container mx-auto px-4">
 		<div class="flex items-center justify-between h-16">
 			<!-- Logo -->
@@ -137,78 +147,109 @@
 				</NavigationMenu.Root>
 			</div>
 
-			<!-- Mobile Hamburger Menu Button -->
+			<!-- Mobile Drawer Menu Button -->
 			<div class="md:hidden">
-				<button
-					onclick={toggleMobileMenu}
-					class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-					aria-expanded={mobileMenuOpen}
-				>
-					<span class="sr-only">Open main menu</span>
-					{#if mobileMenuOpen}
-						<!-- Close icon -->
-						<svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-						</svg>
-					{:else}
-						<!-- Hamburger icon -->
+				<Drawer.Root bind:open={mobileMenuOpen}>
+					<Drawer.Trigger
+						class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+					>
+						<span class="sr-only">Open navigation menu</span>
 						<svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
 						</svg>
-					{/if}
-				</button>
+					</Drawer.Trigger>
+					<Drawer.Content>
+						<div class="mx-auto w-full max-w-sm">
+							<Drawer.Header>
+								<Drawer.Title>Navegação</Drawer.Title>
+								<Drawer.Description>Aceda às diferentes secções do portal</Drawer.Description>
+							</Drawer.Header>
+							<div class="p-4 pb-0 space-y-2">
+								<!-- Public Navigation Links -->
+								<button
+									onclick={() => handleMobileNavigation('/')}
+									class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+								>
+									<FileTextIcon class="w-5 h-5" />
+									<span>Iniciativas</span>
+								</button>
+								<button
+									onclick={() => handleMobileNavigation('/autarcas')}
+									class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+								>
+									<UsersIcon class="w-5 h-5" />
+									<span>Autarcas</span>
+								</button>
+
+								{#if data.user}
+									<!-- User Section -->
+									<div class="border-t border-gray-200 pt-4 mt-4">
+										<div class="px-4 py-3 bg-blue-50 rounded-lg mb-2">
+											<div class="flex items-center space-x-3">
+												<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+													<span class="text-sm font-bold text-blue-700">
+														{data.user.email.charAt(0).toUpperCase()}
+													</span>
+												</div>
+												<div>
+													<div class="text-sm font-medium text-gray-900">{data.user.email}</div>
+													<div class="text-xs text-gray-500">Utilizador autenticado</div>
+												</div>
+											</div>
+										</div>
+
+										<button
+											onclick={() => handleMobileNavigation('/backoffice')}
+											class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+										>
+											<EditIcon class="w-5 h-5" />
+											<span>Minhas Iniciativas</span>
+										</button>
+										<button
+											onclick={() => handleMobileNavigation('/backoffice/initiatives/new')}
+											class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+										>
+											<PlusIcon class="w-5 h-5" />
+											<span>Nova Iniciativa</span>
+										</button>
+										<button
+											onclick={() => handleMobileNavigation('/backoffice/admin')}
+											class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+										>
+											<SettingsIcon class="w-5 h-5" />
+											<span>Administração</span>
+										</button>
+										<button
+											onclick={logout}
+											class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+										>
+											<LogOutIcon class="w-5 h-5" />
+											<span>Terminar Sessão</span>
+										</button>
+									</div>
+								{:else}
+									<!-- Login Section for Non-authenticated Users -->
+									<div class="border-t border-gray-200 pt-4 mt-4">
+										<button
+											onclick={() => handleMobileNavigation('/login')}
+											class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+										>
+											<LogInIcon class="w-5 h-5" />
+											<span>Entrar</span>
+										</button>
+									</div>
+								{/if}
+							</div>
+							<Drawer.Footer>
+								<Drawer.Close class="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors">
+									Fechar
+								</Drawer.Close>
+							</Drawer.Footer>
+						</div>
+					</Drawer.Content>
+				</Drawer.Root>
 			</div>
 		</div>
-
-		<!-- Mobile Navigation Menu -->
-		{#if mobileMenuOpen}
-			<div class="md:hidden border-t border-gray-200 bg-white">
-				<div class="px-2 pt-2 pb-3 space-y-1">
-					<!-- Public Navigation Links -->
-					<a href="/" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-						Iniciativas
-					</a>
-					<a href="/autarcas" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-						Autarcas
-					</a>
-
-					{#if data.user}
-						<!-- User Navigation Links -->
-						<div class="border-t border-gray-200 pt-4 mt-4">
-							<div class="px-3 py-2">
-								<div class="flex items-center space-x-3">
-									<div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-										<span class="text-sm font-medium text-blue-700">
-											{data.user.email.charAt(0).toUpperCase()}
-										</span>
-									</div>
-									<div class="text-sm font-medium text-gray-900">{data.user.email}</div>
-								</div>
-							</div>
-							<a href="/backoffice" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-								Minhas Iniciativas
-							</a>
-							<a href="/backoffice/initiatives/new" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-								Nova Iniciativa
-							</a>
-							<a href="/backoffice/admin" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-								Administração
-							</a>
-							<button onclick={logout} class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-gray-50">
-								Terminar Sessão
-							</button>
-						</div>
-					{:else}
-						<!-- Login Link for Non-authenticated Users -->
-						<div class="border-t border-gray-200 pt-4 mt-4">
-							<a href="/login" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-								Entrar
-							</a>
-						</div>
-					{/if}
-				</div>
-			</div>
-		{/if}
 	</div>
 </header>
 
