@@ -5,7 +5,6 @@
 		stretchFirst?: boolean;
 		gridGap?: string;
 		colWidth?: string;
-		items?: any[];
 		reset?: boolean;
 		children: Snippet;
 	}
@@ -22,7 +21,6 @@
 		stretchFirst = false,
 		gridGap = '0.5em',
 		colWidth = 'minmax(Min(20em, 100%), 1fr)',
-		items = [],
 		reset = false,
 		children,
 	}: MasonryProps = $props();
@@ -99,7 +97,7 @@
 			calcGrid([masonryElement]);
 		}
 
-		if (items.length || reset) {
+		if (reset) {
 			masonryElement = masonryElement;
 		}
 	});
