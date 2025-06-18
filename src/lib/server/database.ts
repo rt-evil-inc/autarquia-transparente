@@ -216,16 +216,38 @@ export const queries = {	// User functions
 		return result.id;
 	},
 
-	createInitiativeFull: (title: string, description: string, content: string, parish_id: number, category: string, created_by: number, status: string, submission_date: string | null) => {
+	createInitiativeFull: (data: {
+		title: string,
+		description: string,
+		content: string,
+		parish_id: number,
+		category: string,
+		created_by: number,
+		status: string,
+		submission_date: string | null,
+		proposal_number?: string | null,
+		proposal_type?: string | null,
+		meeting_number?: number | null,
+		meeting_date?: string | null,
+		meeting_type?: string | null,
+		meeting_notes?: string | null,
+	}) => {
 		const result = drizzleDb.insert(initiatives).values({
-			title,
-			description,
-			content,
-			parish_id,
-			category,
-			created_by,
-			status: status as 'draft' | 'submitted' | 'approved' | 'rejected',
-			submission_date,
+			title: data.title,
+			description: data.description,
+			content: data.content,
+			parish_id: data.parish_id,
+			category: data.category,
+			created_by: data.created_by,
+			status: data.status as 'draft' | 'submitted' | 'approved' | 'rejected',
+			submission_date: data.submission_date,
+			// Meeting fields
+			proposal_number: data.proposal_number,
+			proposal_type: data.proposal_type as 'proposal' | 'amendment' | null,
+			meeting_number: data.meeting_number,
+			meeting_date: data.meeting_date,
+			meeting_type: data.meeting_type as 'public' | 'private' | 'extraordinary' | null,
+			meeting_notes: data.meeting_notes,
 		}).returning({ id: initiatives.id }).get();
 		return result.id;
 	},
@@ -246,6 +268,13 @@ export const queries = {	// User functions
 			updated_at: initiatives.updated_at,
 			parish_name: parishes.name,
 			parish_code: parishes.code,
+			// Meeting fields
+			proposal_number: initiatives.proposal_number,
+			proposal_type: initiatives.proposal_type,
+			meeting_number: initiatives.meeting_number,
+			meeting_date: initiatives.meeting_date,
+			meeting_type: initiatives.meeting_type,
+			meeting_notes: initiatives.meeting_notes,
 		})
 			.from(initiatives)
 			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
@@ -435,18 +464,38 @@ export const queries = {	// User functions
 			.where(eq(initiatives.id, id)).run();
 	},
 
-	updateInitiativeFull: (id: number, title: string, description: string, content: string, category: string, status: string, submission_date: string | null): void => {
+	updateInitiativeFull: (id: number, data: {
+		title: string,
+		description: string,
+		content: string,
+		category: string,
+		status: string,
+		submission_date: string | null,
+		proposal_number?: string | null,
+		proposal_type?: string | null,
+		meeting_number?: number | null,
+		meeting_date?: string | null,
+		meeting_type?: string | null,
+		meeting_notes?: string | null,
+	}): void => {
 		const updateData: Partial<typeof initiatives.$inferInsert> = {
-			title,
-			description,
-			content,
-			category,
-			status: status as 'draft' | 'submitted' | 'approved' | 'rejected',
+			title: data.title,
+			description: data.description,
+			content: data.content,
+			category: data.category,
+			status: data.status as 'draft' | 'submitted' | 'approved' | 'rejected',
 			updated_at: (new Date).toISOString(),
+			// Meeting fields
+			proposal_number: data.proposal_number,
+			proposal_type: data.proposal_type as 'proposal' | 'amendment' | null,
+			meeting_number: data.meeting_number,
+			meeting_date: data.meeting_date,
+			meeting_type: data.meeting_type as 'public' | 'private' | 'extraordinary' | null,
+			meeting_notes: data.meeting_notes,
 		};
 
-		if (submission_date !== null) {
-			updateData.submission_date = submission_date;
+		if (data.submission_date !== null) {
+			updateData.submission_date = data.submission_date;
 		}
 
 		drizzleDb.update(initiatives)

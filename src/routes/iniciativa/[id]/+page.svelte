@@ -29,6 +29,13 @@
 
 	let voteResults = initiative?.votes ? getVoteStatistics(initiative.votes) : null;
 	let votingResult = initiative?.votes ? calculateVotingResult(initiative.votes) : null;
+
+	// Separate regular documents from proposal documents
+	const regularDocuments = initiative?.documents?.filter(doc => !doc.original_filename.startsWith('Proposta:') &&
+		!doc.filename.startsWith('proposal-')) || [];
+
+	const proposalDocuments = initiative?.documents?.filter(doc => doc.original_filename.startsWith('Proposta:') ||
+		doc.filename.startsWith('proposal-')) || [];
 </script>
 
 <svelte:head>
@@ -152,9 +159,140 @@
 				</div>
 			</CardContent>
 		</Card>
+
+		<!-- Meeting Information -->
+		{#if initiative.proposal_number || initiative.proposal_type || initiative.meeting_number || initiative.meeting_date || initiative.meeting_type || initiative.meeting_notes}
+			<Card>
+				<CardHeader>
+					<CardTitle>Informação da Reunião</CardTitle>
+					<CardDescription>
+						Detalhes sobre a proposta e reunião da Assembleia de Freguesia
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<!-- Proposal Information -->
+						{#if initiative.proposal_number || initiative.proposal_type}
+							<div class="space-y-4">
+								<h4 class="font-semibold text-sm text-gray-900 uppercase tracking-wide">Proposta</h4>
+								{#if initiative.proposal_number}
+									<div>
+										<span class="text-sm font-medium text-gray-600">Número da Proposta:</span>
+										<p class="text-gray-900">{initiative.proposal_number}</p>
+									</div>
+								{/if}
+								{#if initiative.proposal_type}
+									<div>
+										<span class="text-sm font-medium text-gray-600">Tipo de Proposta:</span>
+										<p class="text-gray-900 capitalize">{initiative.proposal_type}</p>
+									</div>
+								{/if}
+							</div>
+						{/if}
+
+						<!-- Meeting Information -->
+						{#if initiative.meeting_number || initiative.meeting_date || initiative.meeting_type}
+							<div class="space-y-4">
+								<h4 class="font-semibold text-sm text-gray-900 uppercase tracking-wide">Reunião</h4>
+								{#if initiative.meeting_number}
+									<div>
+										<span class="text-sm font-medium text-gray-600">Número da Reunião:</span>
+										<p class="text-gray-900">{initiative.meeting_number}</p>
+									</div>
+								{/if}
+								{#if initiative.meeting_date}
+									<div>
+										<span class="text-sm font-medium text-gray-600">Data da Reunião:</span>
+										<p class="text-gray-900">{formatDate(initiative.meeting_date)}</p>
+									</div>
+								{/if}
+								{#if initiative.meeting_type}
+									<div>
+										<span class="text-sm font-medium text-gray-600">Tipo de Reunião:</span>
+										<p class="text-gray-900 capitalize">{initiative.meeting_type}</p>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</div>
+
+					<!-- Meeting Notes -->
+					{#if initiative.meeting_notes}
+						<div class="mt-6 pt-6 border-t">
+							<h4 class="font-semibold text-sm text-gray-900 uppercase tracking-wide mb-2">Observações da Reunião</h4>
+							<div class="prose prose-gray max-w-none">
+								{#each initiative.meeting_notes.split('\n') as paragraph (paragraph)}
+									{#if paragraph.trim()}
+										<p class="mb-2 text-gray-700">{paragraph}</p>
+									{/if}
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</CardContent>
+			</Card>
+		{/if}
+
+		<!-- Proposal Documents -->
+		{#if proposalDocuments.length > 0}
+			<Card>
+				<CardHeader>
+					<CardTitle>Documento da Proposta</CardTitle>
+					<CardDescription>
+						Documento oficial da proposta submetida à Assembleia de Freguesia
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{#each proposalDocuments as doc (doc.id)}
+						<div class="space-y-4">
+							<!-- PDF Embed for proposal documents -->
+							{#if doc.mime_type === 'application/pdf'}
+								<div class="w-full">
+									<div class="border rounded-lg overflow-hidden">
+										<iframe
+											src="/uploads/{doc.filename}"
+											class="w-full"
+											style="height: 600px;"
+											title="Documento da Proposta"
+										>
+										</iframe>
+									</div>
+								</div>
+							{/if}
+							<!-- Document Info -->
+							<div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+								<div class="flex items-center space-x-3">
+									<div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+										📄
+									</div>
+									<div>
+										<div class="font-medium text-blue-900">
+											{doc.original_filename.replace('Proposta: ', '')}
+										</div>
+										<div class="text-sm text-blue-700">
+											{Math.round(doc.file_size / 1024)} KB
+										</div>
+									</div>
+								</div>
+								<div class="flex items-center space-x-2">
+									<a href="/uploads/{doc.filename}" target="_blank">
+										<Button variant="outline" size="sm">Ver PDF</Button>
+									</a>
+									<a href="/uploads/{doc.filename}" download>
+										<Button variant="outline" size="sm">Descarregar</Button>
+									</a>
+								</div>
+							</div>
+
+						</div>
+					{/each}
+				</CardContent>
+			</Card>
+		{/if}
+
 		<!-- Documents -->
-		{#if initiative.documents && initiative.documents.length > 0}
-			<DocumentCard initiative={initiative} ></DocumentCard>
+		{#if regularDocuments && regularDocuments.length > 0}
+			<DocumentCard initiative={{ ...initiative, documents: regularDocuments }} />
 		{/if}
 
 		<!-- Voting Results -->

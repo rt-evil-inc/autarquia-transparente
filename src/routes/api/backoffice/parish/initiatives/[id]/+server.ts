@@ -64,6 +64,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 
 	const contentType = request.headers.get('content-type') || '';
 	let title, description, content, category, tags, status, votes, file;
+	let proposalNumber, proposalType, meetingNumber, meetingDate, meetingType, meetingNotes, proposalFile;
 
 	if (contentType.includes('multipart/form-data')) {
 		// Handle file upload
@@ -76,10 +77,18 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		tags = formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [];
 		votes = formData.get('votes') ? JSON.parse(formData.get('votes') as string) : [];
 		file = formData.get('document') as File;
+		// Meeting fields
+		proposalNumber = formData.get('proposalNumber') as string;
+		proposalType = formData.get('proposalType') as string;
+		meetingNumber = formData.get('meetingNumber') ? parseInt(formData.get('meetingNumber') as string) : null;
+		meetingDate = formData.get('meetingDate') as string;
+		meetingType = formData.get('meetingType') as string;
+		meetingNotes = formData.get('meetingNotes') as string;
+		proposalFile = formData.get('proposalDocument') as File;
 	} else {
 		// Handle JSON data
 		const data = await request.json();
-		({ title, description, content, category, tags, status, votes } = data);
+		({ title, description, content, category, tags, status, votes, proposalNumber, proposalType, meetingNumber, meetingDate, meetingType, meetingNotes } = data);
 	}
 
 	if (!title) {
@@ -106,12 +115,20 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	// Update initiative using queries
 	queries.updateInitiativeFull(
 		Number(id),
-		title,
-		description,
-		content,
-		category,
-		initiativeStatus,
-		submissionDate,
+		{
+			title,
+			description,
+			content,
+			category,
+			status: initiativeStatus,
+			submission_date: submissionDate,
+			proposal_number: proposalNumber || null,
+			proposal_type: proposalType || null,
+			meeting_number: meetingNumber || null,
+			meeting_date: meetingDate || null,
+			meeting_type: meetingType || null,
+			meeting_notes: meetingNotes || null,
+		},
 	);
 
 	// Update tags - clear existing and add new ones
@@ -167,6 +184,36 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 			filePath,
 			file.size,
 			file.type,
+		);
+	}
+
+	// Handle proposal document upload if provided
+	if (proposalFile && proposalFile.size > 0) {
+		const uploadsDir = path.join(process.cwd(), 'static', 'uploads');
+
+		// Ensure uploads directory exists
+		if (!existsSync(uploadsDir)) {
+			await mkdir(uploadsDir, { recursive: true });
+		}
+
+		// Generate unique filename with proposal prefix
+		const timestamp = Date.now();
+		const fileExtension = path.extname(proposalFile.name);
+		const filename = `proposal-${timestamp}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+		const filePath = path.join(uploadsDir, filename);
+
+		// Save file
+		const arrayBuffer = await proposalFile.arrayBuffer();
+		await writeFile(filePath, new Uint8Array(arrayBuffer));
+
+		// Save document metadata to database
+		queries.addInitiativeDocument(
+			Number(id),
+			filename,
+			`Proposta: ${proposalFile.name}`, // Mark as proposal document
+			filePath,
+			proposalFile.size,
+			proposalFile.type,
 		);
 	}
 

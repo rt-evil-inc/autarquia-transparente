@@ -40,6 +40,14 @@ export const initiatives = sqliteTable('initiatives', {
 	created_by: integer('created_by').notNull().references(() => users.id),
 	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 	updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+	// Meeting fields
+	proposal_number: text('proposal_number'), // Format: "37/2025" or "37-A/2025"
+	proposal_type: text('proposal_type', { enum: ['proposal', 'amendment'] }), // "proposal" or "amendment"
+	meeting_number: integer('meeting_number'),
+	meeting_date: text('meeting_date'),
+	meeting_type: text('meeting_type', { enum: ['public', 'private', 'extraordinary'] }), // "public", "private", "extraordinary"
+	meeting_notes: text('meeting_notes'),
+	proposal_link: text('proposal_link'), // For PDF embedding
 });
 
 export const initiative_documents = sqliteTable('initiative_documents', {

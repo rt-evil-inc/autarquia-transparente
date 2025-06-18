@@ -1,4 +1,4 @@
-import type { InitiativeWithParish, Parish, Tag } from '$lib/server/database';
+import type { Parish, Tag } from '$lib/server/database';
 import { error } from '@sveltejs/kit';
 import type { InitiativesResponse } from './api/initiatives/+server.js';
 

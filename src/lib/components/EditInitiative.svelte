@@ -7,6 +7,7 @@
 	import DocumentManager from './DocumentManager.svelte';
 	import InitiativeStatusInfo from './InitiativeStatusInfo.svelte';
 	import InitiativeActions from './InitiativeActions.svelte';
+	import MeetingInfo from './MeetingInfo.svelte';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 
 	let { initiative, tags }:{initiative?: FullInitiativeResponse, tags: Tag[] } = $props();
@@ -26,6 +27,16 @@
 	let error = $state('');
 	let selectedFile: File | null = $state(null);
 	let fileInput: HTMLInputElement | null = $state(null);
+
+	// Meeting fields
+	let proposalNumber = $state(initiative?.proposal_number ?? '');
+	let proposalType = $state(initiative?.proposal_type ?? '');
+	let meetingNumber = $state(initiative?.meeting_number ?? null);
+	let meetingDate = $state(initiative?.meeting_date ?? '');
+	let meetingType = $state(initiative?.meeting_type ?? '');
+	let meetingNotes = $state(initiative?.meeting_notes ?? '');
+	let proposalDocument: File | null = $state(null);
+	let proposalDocumentInput: HTMLInputElement | null = $state(null);
 
 	const categories = [
 		{ value: 'financas', label: 'Finanças' },
@@ -61,7 +72,7 @@
 					'/api/backoffice/parish/initiatives';
 			const method = isEditMode ? 'PUT' : 'POST';
 
-			if (selectedFile) {
+			if (selectedFile || proposalDocument) {
 				// Use FormData for file upload
 				const formData = new FormData;
 				formData.append('title', title.trim());
@@ -71,7 +82,15 @@
 				formData.append('tags', JSON.stringify(selectedTags));
 				formData.append('status', status);
 				formData.append('votes', JSON.stringify(votes));
-				formData.append('document', selectedFile);
+				if (selectedFile) formData.append('document', selectedFile);
+				if (proposalDocument) formData.append('proposalDocument', proposalDocument);
+				// Meeting fields
+				formData.append('proposalNumber', proposalNumber || '');
+				formData.append('proposalType', proposalType || '');
+				formData.append('meetingNumber', meetingNumber?.toString() || '');
+				formData.append('meetingDate', meetingDate || '');
+				formData.append('meetingType', meetingType || '');
+				formData.append('meetingNotes', meetingNotes || '');
 
 				response = await fetch(url, {
 					method,
@@ -92,6 +111,13 @@
 						tags: selectedTags,
 						status,
 						votes: votes,
+						// Meeting fields
+						proposalNumber: proposalNumber || null,
+						proposalType: proposalType || null,
+						meetingNumber: meetingNumber || null,
+						meetingDate: meetingDate || null,
+						meetingType: meetingType || null,
+						meetingNotes: meetingNotes || null,
 					}),
 				});
 			}
@@ -147,6 +173,18 @@
 
 					<!-- Tags -->
 					<TagManager bind:tags bind:selectedTags bind:error />
+
+					<!-- Meeting Information -->
+					<MeetingInfo
+						bind:proposalNumber
+						bind:proposalType
+						bind:meetingNumber
+						bind:meetingDate
+						bind:meetingType
+						bind:meetingNotes
+						bind:proposalDocument
+						bind:proposalDocumentInput
+					/>
 
 					<!-- Initiative Status Info (Edit Mode) -->
 					{#if isEditMode && initiative}

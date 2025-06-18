@@ -1,11 +1,7 @@
+import { queries } from '$lib/server/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { error, json } from '@sveltejs/kit';
-import { queries, type Initiative, type InitiativeDocument, type Tag, type Vote } from '$lib/server/database';
-export type FullInitiativeResponse = Initiative & {
-  tags: Tag[];
-  votes: Vote[];
-  documents: InitiativeDocument[];
-}
+export type FullInitiativeResponse = Exclude<ReturnType<typeof queries.getFullInitiativeById>, null>;
 
 export const GET: RequestHandler = async ({ params }) => {
 	const { id } = params;
@@ -20,5 +16,6 @@ export const GET: RequestHandler = async ({ params }) => {
 		error(404, 'Initiative not found');
 	}
 
+	fullInitiative satisfies FullInitiativeResponse;
 	return json(fullInitiative);
 };

@@ -22,7 +22,7 @@ export function calculateVotingResult(votes: Vote[]): VoteResult {
 	}
 
 	const favorVotes = votes.filter(v => v.vote === 'favor').length;
-	const againstVotes = votes.filter(v => v.vote === 'against').length;
+	// const againstVotes = votes.filter(v => v.vote === 'against').length;
 	const totalVotes = votes.length;
 
 	// If all votes are in favor (and there are votes), it's unanimous

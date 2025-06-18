@@ -16,6 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const contentType = request.headers.get('content-type') || '';
 	let title, description, content, category, tags, status, file, parishId;
+	let proposalNumber, proposalType, meetingNumber, meetingDate, meetingType, meetingNotes, proposalFile;
 
 	if (contentType.includes('multipart/form-data')) {
 		// Handle file upload
@@ -28,10 +29,33 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		parishId = formData.get('parish_id') as string;
 		tags = formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [];
 		file = formData.get('document') as File;
+		proposalFile = formData.get('proposalDocument') as File;
+
+		// Meeting fields
+		proposalNumber = formData.get('proposalNumber') as string || null;
+		proposalType = formData.get('proposalType') as string || null;
+		meetingNumber = formData.get('meetingNumber') ? Number(formData.get('meetingNumber')) : null;
+		meetingDate = formData.get('meetingDate') as string || null;
+		meetingType = formData.get('meetingType') as string || null;
+		meetingNotes = formData.get('meetingNotes') as string || null;
 	} else {
 		// Handle JSON data
 		const data = await request.json();
-		({ title, description, content, category, tags, status, parish_id: parishId } = data);
+		({
+			title,
+			description,
+			content,
+			category,
+			tags,
+			status,
+			parish_id: parishId,
+			proposal_number: proposalNumber,
+			proposal_type: proposalType,
+			meeting_number: meetingNumber,
+			meeting_date: meetingDate,
+			meeting_type: meetingType,
+			meeting_notes: meetingNotes,
+		} = data);
 	}
 
 	if (!title) {
@@ -49,16 +73,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const submissionDate = initiativeStatus === 'submitted' || initiativeStatus === 'approved' ? (new Date).toISOString() : null;
 
 	// Create initiative using queries
-	const initiativeId = queries.createInitiativeFull(
+	const initiativeId = queries.createInitiativeFull({
 		title,
 		description,
 		content,
-		targetParishId,
-		category || null,
-		locals.user.id,
-		initiativeStatus,
-		submissionDate,
-	);
+		parish_id: targetParishId,
+		category: category || null,
+		created_by: locals.user.id,
+		status: initiativeStatus,
+		submission_date: submissionDate,
+		proposal_number: proposalNumber,
+		proposal_type: proposalType,
+		meeting_number: meetingNumber,
+		meeting_date: meetingDate,
+		meeting_type: meetingType,
+		meeting_notes: meetingNotes,
+	});
 
 	// Add tags if provided
 	if (tags && Array.isArray(tags) && tags.length > 0) {
@@ -94,6 +124,36 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			filePath,
 			file.size,
 			file.type,
+		);
+	}
+
+	// Handle proposal document upload if provided (already extracted from formData above)
+	if (proposalFile && proposalFile.size > 0) {
+		const uploadsDir = path.join(process.cwd(), 'static', 'uploads');
+
+		// Ensure uploads directory exists
+		if (!existsSync(uploadsDir)) {
+			await mkdir(uploadsDir, { recursive: true });
+		}
+
+		// Generate unique filename with proposal prefix
+		const timestamp = Date.now();
+		const fileExtension = path.extname(proposalFile.name);
+		const filename = `proposal-${timestamp}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+		const filePath = path.join(uploadsDir, filename);
+
+		// Save file
+		const arrayBuffer = await proposalFile.arrayBuffer();
+		await writeFile(filePath, new Uint8Array(arrayBuffer));
+
+		// Save document metadata to database
+		queries.addInitiativeDocument(
+			initiativeId,
+			filename,
+			`Proposta: ${proposalFile.name}`, // Mark as proposal document
+			filePath,
+			proposalFile.size,
+			proposalFile.type,
 		);
 	}
 

@@ -8,6 +8,13 @@
       "when": 1750178473560,
       "tag": "0000_natural_fixer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1750257782592,
+      "tag": "0001_smart_reavers",
+      "breakpoints": true
     }
   ]
 }
