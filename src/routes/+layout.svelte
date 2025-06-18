@@ -1,12 +1,19 @@
 <script lang="ts">
 	import '../app.css';
 	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	let { children, data } = $props();
 
-	function logout() {
-		window.location.href = '/api/auth/logout';
+	async function logout() {
+		await fetch('/api/auth/logout', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+		goto('/');
+		invalidateAll();
 	}
 </script>
 

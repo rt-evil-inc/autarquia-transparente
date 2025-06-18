@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	let email = '';
 	let password = '';
@@ -29,9 +29,13 @@
 			if (response.ok) {
 				// Redirect based on role
 				if (data.user.role === 'admin') {
-					goto('/backoffice/admin');
+					goto('/backoffice/admin', {
+						invalidateAll: true,
+					});
 				} else if (data.user.role === 'parish') {
-					goto('/backoffice');
+					goto('/backoffice', {
+						invalidateAll: true,
+					});
 				} else {
 					goto('/');
 				}
