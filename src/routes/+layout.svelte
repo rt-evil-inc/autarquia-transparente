@@ -4,6 +4,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 
 	let { children, data } = $props();
+	let mobileMenuOpen = $state(false);
 
 	async function logout() {
 		await fetch('/api/auth/logout', {
@@ -14,6 +15,14 @@
 		});
 		goto('/');
 		invalidateAll();
+	}
+
+	function toggleMobileMenu() {
+		mobileMenuOpen = !mobileMenuOpen;
+	}
+
+	function closeMobileMenu() {
+		mobileMenuOpen = false;
 	}
 </script>
 
@@ -35,8 +44,8 @@
 				</a>
 			</div>
 
-			<!-- Navigation Menu -->
-			<div class="flex items-center space-x-2">
+			<!-- Desktop Navigation Menu -->
+			<div class="hidden md:flex items-center space-x-2">
 				<NavigationMenu.Root viewport={false}>
 					<NavigationMenu.List>
 						<!-- Public Iniciativas Link -->
@@ -127,7 +136,79 @@
 					</NavigationMenu.List>
 				</NavigationMenu.Root>
 			</div>
+
+			<!-- Mobile Hamburger Menu Button -->
+			<div class="md:hidden">
+				<button
+					onclick={toggleMobileMenu}
+					class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+					aria-expanded={mobileMenuOpen}
+				>
+					<span class="sr-only">Open main menu</span>
+					{#if mobileMenuOpen}
+						<!-- Close icon -->
+						<svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					{:else}
+						<!-- Hamburger icon -->
+						<svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+						</svg>
+					{/if}
+				</button>
+			</div>
 		</div>
+
+		<!-- Mobile Navigation Menu -->
+		{#if mobileMenuOpen}
+			<div class="md:hidden border-t border-gray-200 bg-white">
+				<div class="px-2 pt-2 pb-3 space-y-1">
+					<!-- Public Navigation Links -->
+					<a href="/" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+						Iniciativas
+					</a>
+					<a href="/autarcas" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+						Autarcas
+					</a>
+
+					{#if data.user}
+						<!-- User Navigation Links -->
+						<div class="border-t border-gray-200 pt-4 mt-4">
+							<div class="px-3 py-2">
+								<div class="flex items-center space-x-3">
+									<div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+										<span class="text-sm font-medium text-blue-700">
+											{data.user.email.charAt(0).toUpperCase()}
+										</span>
+									</div>
+									<div class="text-sm font-medium text-gray-900">{data.user.email}</div>
+								</div>
+							</div>
+							<a href="/backoffice" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+								Minhas Iniciativas
+							</a>
+							<a href="/backoffice/initiatives/new" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+								Nova Iniciativa
+							</a>
+							<a href="/backoffice/admin" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+								Administração
+							</a>
+							<button onclick={logout} class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-gray-50">
+								Terminar Sessão
+							</button>
+						</div>
+					{:else}
+						<!-- Login Link for Non-authenticated Users -->
+						<div class="border-t border-gray-200 pt-4 mt-4">
+							<a href="/login" onclick={closeMobileMenu} class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+								Entrar
+							</a>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	</div>
 </header>
 
