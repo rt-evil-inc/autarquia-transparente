@@ -252,38 +252,19 @@
 										<iframe
 											src="/uploads/{doc.filename}"
 											class="w-full"
-											style="height: 600px;"
+											style="height: 800px;"
 											title="Documento da Proposta"
 										>
 										</iframe>
 									</div>
 								</div>
 							{/if}
-							<!-- Document Info -->
-							<div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-								<div class="flex items-center space-x-3">
-									<div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
-										📄
-									</div>
-									<div>
-										<div class="font-medium text-blue-900">
-											{doc.original_filename.replace('Proposta: ', '')}
-										</div>
-										<div class="text-sm text-blue-700">
-											{Math.round(doc.file_size / 1024)} KB
-										</div>
-									</div>
-								</div>
-								<div class="flex items-center space-x-2">
-									<a href="/uploads/{doc.filename}" target="_blank">
-										<Button variant="outline" size="sm">Ver PDF</Button>
-									</a>
-									<a href="/uploads/{doc.filename}" download>
-										<Button variant="outline" size="sm">Descarregar</Button>
-									</a>
-								</div>
+							<!-- Document Info - Discrete -->
+							<div class="text-center">
+								<p class="text-xs text-gray-500">
+									{doc.original_filename.replace('Proposta: ', '')} • {Math.round(doc.file_size / 1024)} KB
+								</p>
 							</div>
-
 						</div>
 					{/each}
 				</CardContent>
