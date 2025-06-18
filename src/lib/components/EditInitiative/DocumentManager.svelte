@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import type { FullInitiativeResponse } from '../../routes/api/initiatives/[id]/+server';
+	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
+	import Input from '../ui/input/input.svelte';
 
 	let {
 		initiative,
@@ -13,7 +14,7 @@
 		initiative?: FullInitiativeResponse,
 		isEditMode: boolean,
 		selectedFile: File | null,
-		fileInput: HTMLInputElement | null,
+		fileInput: FileList | undefined,
 		error: string
 	} = $props();
 
@@ -86,8 +87,8 @@
 <div class="space-y-2">
 	<Label for="document">{isEditMode ? 'Adicionar Documento Oficial' : 'Documento'}</Label>
 	<div class="space-y-2">
-		<input
-			bind:this={fileInput}
+		<Input
+			bind:files={fileInput}
 			type="file"
 			id="document"
 			accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
@@ -110,7 +111,7 @@
 					type="button"
 					onclick={() => {
 						selectedFile = null;
-						if (fileInput) fileInput.value = '';
+						if (fileInput) fileInput = undefined;
 					}}
 				>
 					Remover

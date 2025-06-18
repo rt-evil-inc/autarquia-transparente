@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Tag } from '$lib/server/database';
-	import type { FullInitiativeResponse } from '../../routes/api/initiatives/[id]/+server';
+	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
 	import VoteEditor from './VoteEditor.svelte';
 	import InitiativeBasicInfo from './InitiativeBasicInfo.svelte';
 	import TagManager from './TagManager.svelte';
@@ -26,7 +26,7 @@
 	let saving = $state(false);
 	let error = $state('');
 	let selectedFile: File | null = $state(null);
-	let fileInput: HTMLInputElement | null = $state(null);
+	let fileInput: FileList | undefined = $state(undefined);
 
 	// Meeting fields
 	let proposalNumber = $state(initiative?.proposal_number ?? '');
@@ -36,7 +36,7 @@
 	let meetingType = $state(initiative?.meeting_type ?? '');
 	let meetingNotes = $state(initiative?.meeting_notes ?? '');
 	let proposalDocument: File | null = $state(null);
-	let proposalDocumentInput: HTMLInputElement | null = $state(null);
+	let proposalDocumentInput: FileList | undefined = $state(undefined);
 
 	const categories = [
 		{ value: 'financas', label: 'Finanças' },
@@ -130,7 +130,7 @@
 					error = '';
 					// Clear the selected file after successful upload
 					selectedFile = null;
-					if (fileInput) fileInput.value = '';
+					if (fileInput) fileInput = undefined;
 				} else {
 					// For create mode, redirect to the new initiative
 					window.location.href = `/backoffice/initiatives/${responseData.id}`;

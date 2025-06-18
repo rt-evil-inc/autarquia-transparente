@@ -1,5 +1,5 @@
 <script lang="ts">
-	import EditInitiative from '$lib/components/EditInitiative.svelte';
+	import EditInitiative from '$lib/components/EditInitiative/EditInitiative.svelte';
 
 	// Re-export the unified component
 	let { data } = $props();

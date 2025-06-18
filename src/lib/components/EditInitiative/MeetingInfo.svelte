@@ -13,7 +13,7 @@
 		meetingType = $bindable(''),
 		meetingNotes = $bindable(''),
 		proposalDocument = $bindable(null),
-		proposalDocumentInput = $bindable(null),
+		proposalDocumentInput = $bindable(undefined),
 	}: {
 		proposalNumber: string,
 		proposalType: string,
@@ -22,7 +22,7 @@
 		meetingType: string,
 		meetingNotes: string,
 		proposalDocument: File | null,
-		proposalDocumentInput: HTMLInputElement | null
+		proposalDocumentInput: FileList | undefined
 	} = $props();
 
 	const proposalTypeOptions = [
@@ -134,8 +134,8 @@
 		<!-- Proposal Document -->
 		<div class="flex flex-col gap-1.5">
 			<Label for="proposalDocument">Documento da Proposta (PDF)</Label>
-			<input
-				bind:this={proposalDocumentInput}
+			<Input
+				bind:files={proposalDocumentInput}
 				type="file"
 				id="proposalDocument"
 				accept=".pdf"
@@ -157,7 +157,7 @@
 						type="button"
 						onclick={() => {
 							proposalDocument = null;
-							if (proposalDocumentInput) proposalDocumentInput.value = '';
+							if (proposalDocumentInput) proposalDocumentInput = undefined;
 						}}
 					>
 						Remover

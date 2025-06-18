@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import type { FullInitiativeResponse } from '../../routes/api/initiatives/[id]/+server';
+	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
 
 	let {
 		initiative,

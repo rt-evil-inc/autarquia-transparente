@@ -2,6 +2,7 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import * as Select from '$lib/components/ui/select/index.js';
+	import Textarea from '../ui/textarea/textarea.svelte';
 
 	let { title = $bindable(), description = $bindable(), content = $bindable(), category = $bindable() } = $props();
 
@@ -38,23 +39,23 @@
 <!-- Description -->
 <div class="space-y-2">
 	<Label for="description">Descrição Resumida</Label>
-	<textarea
+	<Textarea
 		id="description"
 		bind:value={description}
 		placeholder="Descrição breve da iniciativa (opcional)"
 		class="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-	></textarea>
+	/>
 </div>
 
 <!-- Content -->
 <div class="space-y-2">
 	<Label for="content">Conteúdo Detalhado</Label>
-	<textarea
+	<Textarea
 		id="content"
 		bind:value={content}
 		placeholder="Descrição detalhada da iniciativa, objetivos, justificação..."
 		class="w-full min-h-[200px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-	></textarea>
+	/>
 </div>
 
 <!-- Category -->

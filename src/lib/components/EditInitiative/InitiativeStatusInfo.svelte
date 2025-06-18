@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FullInitiativeResponse } from '../../routes/api/initiatives/[id]/+server';
+	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
 
 	let { initiative }: { initiative: FullInitiativeResponse } = $props();
 </script>
