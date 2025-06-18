@@ -13,6 +13,7 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import branding from '$lib/config/branding.js';
 	import { calculateVotingResult } from '$lib/voting';
+	import Masonry from '$lib/components/Masonry.svelte';
 
 	let { data } = $props();
 
@@ -85,7 +86,7 @@
 </script>
 
 <svelte:head>
-	<title>Portal do Autarca - Todas as Iniciativas</title>
+	<title>{branding.siteName} - {branding.pages.home.title}</title>
 	<meta
 		name="description"
 		content="Iniciativas apresentadas por autarcas em todas as freguesias de Lisboa"
@@ -295,7 +296,11 @@
 		</div>
 	{:else}
 		<!-- Initiatives Grid -->
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		<!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> -->
+		<Masonry
+			gridGap="0.75rem"
+			colWidth="minmax(Min(20em, 100%), 1fr)"
+		>
 			{#each initiatives as initiative (initiative.id)}
 				<a href="/iniciativa/{initiative.id}" class="block group">
 					<Card
@@ -367,7 +372,8 @@
 					</Card>
 				</a>
 			{/each}
-		</div>
+			<!-- </div> -->
+		</Masonry>
 	{/if}
 </main>
 
