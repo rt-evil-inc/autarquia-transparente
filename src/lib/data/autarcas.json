@@ -1,0 +1,66 @@
+[
+  {
+    "id": "maria-silva-costa",
+    "name": "Maria Silva Costa",
+    "municipality": "Vila Nova de Gaia",
+    "parish": "Santa Marinha",
+    "description": "Presidente da Junta de Freguesia de Santa Marinha há 6 anos, com foco especial no desenvolvimento de políticas ambientais e modernização dos serviços digitais. Tem trabalhado intensamente na criação de espaços verdes e no apoio às famílias jovens da freguesia.",
+    "image": "maria-silva-costa.jpg"
+  },
+  {
+    "id": "joao-pedro-santos",
+    "name": "João Pedro Santos",
+    "municipality": "Porto",
+    "parish": "Cedofeita",
+    "description": "Autarca dedicado ao desenvolvimento cultural e turístico da região de Cedofeita. Com formação em arquitetura, tem implementado várias iniciativas de preservação do património histórico e revitalização urbana, sendo reconhecido pelo seu trabalho na área da cultura local.",
+    "image": "joao-pedro-santos.jpg"
+  },
+  {
+    "id": "ana-rita-ferreira",
+    "name": "Ana Rita Ferreira",
+    "municipality": "Braga",
+    "parish": "São Vicente",
+    "description": "Jovem presidente da Junta de Freguesia de São Vicente, conhecida pela sua energia na implementação de políticas de inclusão social. Tem focado especialmente no apoio aos idosos e na criação de programas de emprego jovem na freguesia.",
+    "image": "ana-rita-ferreira.jpg"
+  },
+  {
+    "id": "ricardo-manuel-oliveira",
+    "name": "Ricardo Manuel Oliveira",
+    "municipality": "Coimbra",
+    "parish": "Santo António dos Olivais",
+    "description": "Presidente da Junta de Freguesia de Santo António dos Olivais, com experiência em gestão desportiva. Tem implementado várias iniciativas de promoção do desporto e vida saudável, sendo também um defensor ativo da mobilidade sustentável.",
+    "image": "ricardo-manuel-oliveira.jpg"
+  },
+  {
+    "id": "sofia-helena-rodrigues",
+    "name": "Sofia Helena Rodrigues",
+    "municipality": "Aveiro",
+    "parish": "Glória e Vera Cruz",
+    "description": "Veterana na política local com mais de 12 anos de experiência em gestão autárquica. Especialista em políticas sociais, tem sido fundamental na implementação de projetos de apoio à terceira idade e famílias carenciadas da freguesia.",
+    "image": "sofia-helena-rodrigues.jpg"
+  },
+  {
+    "id": "miguel-andre-pereira",
+    "name": "Miguel André Pereira",
+    "municipality": "Setúbal",
+    "parish": "São Sebastião",
+    "description": "Presidente da Junta de Freguesia de São Sebastião, com uma forte componente empresarial no seu trabalho. Tem implementado várias iniciativas de apoio ao comércio local e empreendedorismo, sendo conhecido pelas suas parcerias inovadoras com o setor privado.",
+    "image": "miguel-andre-pereira.jpg"
+  },
+  {
+    "id": "patricia-isabel-martins",
+    "name": "Patrícia Isabel Martins",
+    "municipality": "Faro",
+    "parish": "Sé e São Pedro",
+    "description": "Autarca dedicada ao desenvolvimento turístico sustentável da região. Formada em gestão hoteleira, tem apostado fortemente na promoção do turismo responsável e na preservação das tradições locais, criando pontes entre a comunidade e os visitantes.",
+    "image": "patricia-isabel-martins.jpg"
+  },
+  {
+    "id": "nuno-miguel-almeida",
+    "name": "Nuno Miguel Almeida",
+    "municipality": "Évora",
+    "parish": "Bacelo e Senhora da Saúde",
+    "description": "Jovem presidente da Junta de Freguesia, formado em engenharia informática. Tem aplicado princípios de inovação tecnológica na gestão pública, sendo reconhecido pelos projetos de digitalização dos serviços e participação cidadã online.",
+    "image": "nuno-miguel-almeida.jpg"
+  }
+]
