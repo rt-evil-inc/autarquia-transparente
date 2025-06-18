@@ -51,7 +51,7 @@
 
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 		<!-- Proposal Number -->
-		<div>
+		<div class="flex flex-col gap-1.5">
 			<Label for="proposalNumber">Nº da Proposta</Label>
 			<Input
 				id="proposalNumber"
@@ -65,11 +65,15 @@
 		</div>
 
 		<!-- Proposal Type -->
-		<div>
+		<div class="flex flex-col gap-1.5">
 			<Label for="proposalType">Tipo de Proposta</Label>
 			<Select.Root type="single" bind:value={proposalType}>
 				<Select.Trigger>
-					Selecione o tipo
+					{#if proposalType}
+						{proposalTypeOptions.find(option => option.value === proposalType)?.label}
+					{:else}
+						Selecione o tipo
+					{/if}
 				</Select.Trigger>
 				<Select.Content>
 					<Select.Group>
@@ -84,7 +88,7 @@
 		</div>
 
 		<!-- Meeting Number -->
-		<div>
+		<div class="flex flex-col gap-1.5">
 			<Label for="meetingNumber">Nº da Reunião</Label>
 			<Input
 				id="meetingNumber"
@@ -95,7 +99,7 @@
 		</div>
 
 		<!-- Meeting Date -->
-		<div>
+		<div class="flex flex-col gap-1.5">
 			<Label for="meetingDate">Data da Reunião</Label>
 			<Input
 				id="meetingDate"
@@ -105,11 +109,15 @@
 		</div>
 
 		<!-- Meeting Type -->
-		<div>
+		<div class="flex flex-col gap-1.5">
 			<Label for="meetingType">Tipo de Reunião</Label>
 			<Select.Root type="single" bind:value={meetingType}>
 				<Select.Trigger>
-					Selecione o tipo
+					{#if meetingType}
+						{meetingTypeOptions.find(option => option.value === meetingType)?.label}
+					{:else}
+						Selecione o tipo
+					{/if}
 				</Select.Trigger>
 				<Select.Content>
 					<Select.Group>
@@ -124,7 +132,7 @@
 		</div>
 
 		<!-- Proposal Document -->
-		<div>
+		<div class="flex flex-col gap-1.5">
 			<Label for="proposalDocument">Documento da Proposta (PDF)</Label>
 			<input
 				bind:this={proposalDocumentInput}
@@ -137,9 +145,6 @@
 					proposalDocument = target.files?.[0] || null;
 				}}
 			/>
-			<p class="text-sm text-gray-500 mt-1">
-				Apenas ficheiros PDF são aceites (máx. 10MB)
-			</p>
 			{#if proposalDocument}
 				<div class="flex items-center justify-between mt-2 p-2 bg-green-50 rounded border">
 					<div class="flex items-center space-x-2 text-sm text-green-600">
@@ -163,7 +168,7 @@
 	</div>
 
 	<!-- Meeting Notes -->
-	<div>
+	<div class="flex flex-col gap-1.5">
 		<Label for="meetingNotes">Notas da Reunião</Label>
 		<Textarea
 			id="meetingNotes"
