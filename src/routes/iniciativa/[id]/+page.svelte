@@ -15,6 +15,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { getTagClasses } from '$lib/colors';
 	import { calculateVotingResult, getVoteStatistics } from '$lib/voting';
+	import branding from '$lib/config/branding';
 
 	let { data } = $props();
 
@@ -41,7 +42,7 @@
 </script>
 
 <svelte:head>
-	<title>{initiative.title} - Portal do Autarca</title>
+	<title>{initiative.title} - {branding.siteName}</title>
 	<meta
 		name="description"
 		content={initiative.description || initiative.title}

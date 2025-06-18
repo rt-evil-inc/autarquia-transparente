@@ -11,6 +11,7 @@
 	} from '$lib/components/ui/card/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
+	import branding from '$lib/config/branding.js';
 	import { calculateVotingResult } from '$lib/voting';
 
 	let { data } = $props();
@@ -96,11 +97,10 @@
 	<!-- Title and Description -->
 	<div class="text-center mb-8">
 		<h2 class="text-3xl font-bold text-gray-900 mb-4">
-			Todas as iniciativas
+			{branding.pages.home.title}
 		</h2>
 		<p class="text-gray-600 max-w-2xl mx-auto">
-			Iniciativas apresentadas por autarcas em todas as freguesias de
-			Lisboa
+			{branding.pages.home.description}
 		</p>
 	</div>
 

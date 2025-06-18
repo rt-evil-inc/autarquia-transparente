@@ -2,6 +2,7 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import * as Drawer from '$lib/components/ui/drawer/index.js';
 	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
+	import Icon from '$lib/config/icon.svelte';
 	import EditIcon from '@lucide/svelte/icons/edit';
 	import FileTextIcon from '@lucide/svelte/icons/file-text';
 	import LogInIcon from '@lucide/svelte/icons/log-in';
@@ -9,6 +10,7 @@
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import UsersIcon from '@lucide/svelte/icons/users';
+	import branding from '$lib/config/branding';
 	import '../app.css';
 
 	let { children, data } = $props();
@@ -44,12 +46,10 @@
 			<div class="flex items-center space-x-4">
 				<a href="/" class="flex items-center space-x-2">
 					<div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-						<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h1v1H5zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zm2 2v-1h1v1H5zM13 3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 001-1V4a1 1 0 00-1-1h-3zm1 2v1h1V5h-1z" clip-rule="evenodd"/>
-						</svg>
+						<Icon/>
 					</div>
 					<div>
-						<h1 class="text-xl font-bold text-gray-900">Portal do Autarca</h1>
+						<h1 class="text-xl font-bold text-gray-900">{branding.siteName}</h1>
 					</div>
 				</a>
 			</div>

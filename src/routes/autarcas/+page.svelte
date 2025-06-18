@@ -6,6 +6,7 @@
 		CardHeader,
 		CardTitle,
 	} from '$lib/components/ui/card/index.js';
+	import branding from '$lib/config/branding.js';
 
 	let { data } = $props();
 	let autarcas = $derived(data.autarcas);
@@ -20,15 +21,15 @@
 </script>
 
 <svelte:head>
-	<title>Os nossos autarcas - Portal do Autarca</title>
+	<title>{branding.pages.autarcas.title} - {branding.siteName}</title>
 </svelte:head>
 
 <div class="container mx-auto px-4 py-8">
 	<!-- Page Header -->
 	<div class="text-center mb-12">
-		<h1 class="text-4xl font-bold text-gray-900 mb-4">Os autarcas</h1>
+		<h1 class="text-4xl font-bold text-gray-900 mb-4">{branding.pages.autarcas.title}</h1>
 		<p class="text-lg text-gray-600 max-w-2xl mx-auto">
-			Conheça os representantes eleitos que trabalham diariamente para melhorar a vida nas suas comunidades locais.
+			{branding.pages.autarcas.description}
 		</p>
 	</div>
 
