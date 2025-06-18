@@ -47,7 +47,7 @@
 				}),
 			});
 
-			const data: {success:boolean, tag?:number} = await response.json();
+			const data: {success:boolean, tag?:number, error?:string} = await response.json();
 
 			if (response.ok && data.tag) {
 				// Add the new tag to the list and select it
@@ -64,11 +64,11 @@
 				newTagName = '';
 				newTagColor = 'blue';
 				showNewTagForm = false;
-			} else if (response.status === 409) {
+			} else if (response.status === 409 && data.tag) {
 				// Tag already exists, select it if not already selected
 				const existingTag = data.tag;
-				if (!selectedTags.includes(existingTag.id)) {
-					selectedTags = [...selectedTags, existingTag.id];
+				if (!selectedTags.includes(existingTag)) {
+					selectedTags = [...selectedTags, existingTag];
 				}
 				newTagName = '';
 				showNewTagForm = false;
