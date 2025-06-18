@@ -1,4 +1,6 @@
 <script lang="ts">
+	import DownloadIcon from '@lucide/svelte/icons/download';
+
 	interface Document {
 		id: number;
 		original_filename: string;
@@ -21,11 +23,21 @@
 			{#each proposalDocuments as doc (doc.id)}
 				{#if doc.mime_type === 'application/pdf'}
 					<div class="border rounded-lg overflow-hidden shadow-lg">
-						<div class="bg-gray-50 px-3 py-2 border-b">
-							<h4 class="text-sm font-medium text-gray-900 mb-1">Documento da Proposta</h4>
-							<p class="text-xs text-gray-500">
-								{doc.original_filename.replace('Proposta: ', '')} • {Math.round(doc.file_size / 1024)} KB
-							</p>
+						<div class="bg-gray-50 px-3 py-2 border-b flex items-center justify-between">
+							<div>
+								<h4 class="text-sm font-medium text-gray-900 mb-1">Documento da Proposta</h4>
+								<p class="text-xs text-gray-500">
+									{doc.original_filename.replace('Proposta: ', '')} • {Math.round(doc.file_size / 1024)} KB
+								</p>
+							</div>
+							<a
+								href="/uploads/{doc.filename}"
+								download={doc.original_filename}
+								class="flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-200 transition-colors"
+								title="Download PDF"
+							>
+								<DownloadIcon class="w-4 h-4 text-gray-600" />
+							</a>
 						</div>
 						<iframe
 							src="/uploads/{doc.filename}"
