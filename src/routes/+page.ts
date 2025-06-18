@@ -1,5 +1,6 @@
 import type { InitiativeWithParish, Parish, Tag } from '$lib/server/database';
 import { error } from '@sveltejs/kit';
+import type { InitiativesResponse } from './api/initiatives/+server.js';
 
 export interface InitiativeListData {
   initiatives: Array<{
@@ -17,6 +18,12 @@ export interface InitiativeListData {
       id: number;
       name: string;
       color: string;
+    }>;
+    votes: Array<{
+      id: number;
+      vote: 'favor' | 'against' | 'abstention';
+      voter_name: string;
+      notes?: string;
     }>;
   }>;
   parishes: Array<{
@@ -63,7 +70,7 @@ export const load = async ({ url, fetch }) => {
 		throw error(500, 'Failed to load filter data');
 	}
 
-	const [initiatives, parishes, tags]:[(InitiativeWithParish & { tags: Tag[] })[], Parish[], Tag[]] = await Promise.all([
+	const [initiatives, parishes, tags]:[InitiativesResponse, Parish[], Tag[]] = await Promise.all([
 		initiativesResponse.json(),
 		parishesResponse.json(),
 		tagsResponse.json(),

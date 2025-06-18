@@ -11,6 +11,7 @@
 	} from '$lib/components/ui/card/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
+	import { calculateVotingResult } from '$lib/voting';
 
 	let { data } = $props();
 
@@ -345,6 +346,15 @@
 
 							<!-- Meta Info -->
 							<div class="text-xs text-gray-500 space-y-1">
+								{#if initiative.votes && initiative.votes.length > 0}
+									{@const votingResult = calculateVotingResult(initiative.votes)}
+									<div class="flex items-center gap-2">
+										<span>Resultado:</span>
+										<span class="px-2 py-1 rounded-full text-xs font-medium {votingResult.className}">
+											{votingResult.label}
+										</span>
+									</div>
+								{/if}
 								{#if initiative.vote_date}
 									<div>
 										Votação: {formatDate(

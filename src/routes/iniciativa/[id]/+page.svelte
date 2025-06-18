@@ -1,5 +1,7 @@
 <script lang="ts">
 	import DocumentCard from './DocumentCard.svelte';
+	import InfoIcon from '@lucide/svelte/icons/info';
+	import * as HoverCard from '$lib/components/ui/hover-card/index.js';
 
 	import {
 		Card,
@@ -10,6 +12,7 @@
 	} from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { getTagClasses } from '$lib/colors';
+	import { calculateVotingResult, getVoteStatistics } from '$lib/voting';
 
 	let { data } = $props();
 
@@ -24,27 +27,8 @@
 		});
 	}
 
-	function getVoteResults(votes: { vote: 'favor' | 'against' | 'abstention' }[]) {
-		const results = {
-			favor: votes.filter(v => v.vote === 'favor').length,
-			against: votes.filter(v => v.vote === 'against').length,
-			abstention: votes.filter(v => v.vote === 'abstention').length,
-		};
-
-		const total = results.favor + results.against + results.abstention;
-
-		return {
-			...results,
-			total,
-			favorPercent: total > 0 ? Math.round((results.favor / total) * 100) : 0,
-			againstPercent:
-				total > 0 ? Math.round((results.against / total) * 100) : 0,
-			abstentionPercent:
-				total > 0 ? Math.round((results.abstention / total) * 100) : 0,
-		};
-	}
-
-	let voteResults = initiative?.votes ? getVoteResults(initiative.votes) : null;
+	let voteResults = initiative?.votes ? getVoteStatistics(initiative.votes) : null;
+	let votingResult = initiative?.votes ? calculateVotingResult(initiative.votes) : null;
 </script>
 
 <svelte:head>
@@ -76,7 +60,14 @@
 			<CardHeader>
 				<div class="flex items-start justify-between">
 					<div class="flex-1">
-						<CardTitle class="text-2xl mb-2">{initiative.title}</CardTitle>
+						<div class="flex items-center gap-3 mb-2">
+							<CardTitle class="text-2xl">{initiative.title}</CardTitle>
+							{#if votingResult && initiative.votes && initiative.votes.length > 0}
+								<span class="px-3 py-1 rounded-full text-sm font-medium {votingResult.className}">
+									{votingResult.label}
+								</span>
+							{/if}
+						</div>
 						<CardDescription class="text-lg">
 							{initiative.parish_name}
 						</CardDescription>
@@ -170,43 +161,43 @@
 		{#if initiative.votes && initiative.votes.length > 0 && voteResults}
 			<Card>
 				<CardHeader>
-					<CardTitle>Resultados da Votação</CardTitle>
+					<CardTitle>Detalhes da Votação</CardTitle>
 					<CardDescription>
 						Votação realizada na Assembleia de Freguesia
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<!-- Vote Summary -->
-					<div class="grid grid-cols-3 gap-4 mb-6">
+					<div class="grid grid-cols-3 gap-4 mb-4">
 						<div class="text-center">
-							<div class="text-2xl font-bold text-green-600">
+							<div class="text-lg font-bold text-green-600">
 								{voteResults.favor}
 							</div>
-							<div class="text-sm text-gray-600">
+							<div class="text-xs text-gray-600">
 								A Favor ({voteResults.favorPercent}%)
 							</div>
 						</div>
 						<div class="text-center">
-							<div class="text-2xl font-bold text-red-600">
+							<div class="text-lg font-bold text-red-600">
 								{voteResults.against}
 							</div>
-							<div class="text-sm text-gray-600">
+							<div class="text-xs text-gray-600">
 								Contra ({voteResults.againstPercent}%)
 							</div>
 						</div>
 						<div class="text-center">
-							<div class="text-2xl font-bold text-gray-600">
+							<div class="text-lg font-bold text-gray-600">
 								{voteResults.abstention}
 							</div>
-							<div class="text-sm text-gray-600">
+							<div class="text-xs text-gray-600">
 								Abstenções ({voteResults.abstentionPercent}%)
 							</div>
 						</div>
 					</div>
 
 					<!-- Vote Progress Bar -->
-					<div class="w-full bg-gray-200 rounded-full h-3 mb-6">
-						<div class="flex h-3 rounded-full overflow-hidden">
+					<div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+						<div class="flex h-2 rounded-full overflow-hidden">
 							{#if voteResults.favorPercent > 0}
 								<div
 									class="bg-green-500"
@@ -233,17 +224,30 @@
 						<h4 class="font-semibold mb-3">Votos Individuais</h4>
 						<div class="space-y-2">
 							{#each initiative.votes as vote (vote.id)}
-								<div
-									class="flex items-center justify-between py-2 px-3 bg-gray-50 rounded"
-								>
+								<div class="flex items-center justify-between p-3 bg-gray-50 rounded border">
 									<span class="font-medium">{vote.voter_name}</span>
-									<span
-										class="text-sm px-2 py-1 rounded {vote.vote === 'favor' ?
-											'bg-green-100 text-green-800' : vote.vote === 'against' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}"
-									>
-										{vote.vote === 'favor' ?
-											'A Favor' : vote.vote === 'against' ? 'Contra' : 'Abstenção'}
-									</span>
+									<div class="flex items-center gap-2">
+										{#if vote.notes && vote.notes.trim()}
+											<HoverCard.Root>
+												<HoverCard.Trigger class="cursor-help">
+													<InfoIcon class="w-4 h-4 text-gray-500 hover:text-gray-700" />
+												</HoverCard.Trigger>
+												<HoverCard.Content class="w-80">
+													<div class="space-y-2">
+														<h4 class="text-sm font-semibold">Observações de {vote.voter_name}</h4>
+														<p class="text-sm text-gray-700">"{vote.notes}"</p>
+													</div>
+												</HoverCard.Content>
+											</HoverCard.Root>
+										{/if}
+										<span
+											class="text-sm px-2 py-1 rounded {vote.vote === 'favor' ?
+												'bg-green-100 text-green-800' : vote.vote === 'against' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}"
+										>
+											{vote.vote === 'favor' ?
+												'A Favor' : vote.vote === 'against' ? 'Contra' : 'Abstenção'}
+										</span>
+									</div>
 								</div>
 							{/each}
 						</div>

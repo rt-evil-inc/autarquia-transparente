@@ -2,6 +2,14 @@ import { queries } from '$lib/server/database';
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 
+export type InitiativesResponse = ((
+	ReturnType<typeof queries.searchInitiatives>[0] |
+	ReturnType<typeof queries.searchInitiativesWithTag>[0]
+	) & {
+	tags: ReturnType<typeof queries.getInitiativeTags>;
+	votes: ReturnType<typeof queries.getInitiativeVotes>;
+})[];
+
 export const GET: RequestHandler = async ({ url }) => {
 	const searchParams = url.searchParams;
 	const search = searchParams.get('search');
@@ -14,12 +22,12 @@ export const GET: RequestHandler = async ({ url }) => {
 
 	const initiatives = tag ? queries.searchInitiativesWithTag(searchTerm, tag, parish, category) : queries.searchInitiatives(searchTerm, parish, category);
 
-	// Get tags for each initiative
-
-	const initiativesWithTags = initiatives.map(initiative => ({
+	// Get tags and votes for each initiative
+	const initiativesWithTagsAndVotes = initiatives.map(initiative => ({
 		...initiative,
 		tags: queries.getInitiativeTags(initiative.id),
+		votes: queries.getInitiativeVotes(initiative.id),
 	}));
-
-	return json(initiativesWithTags);
+	initiativesWithTagsAndVotes satisfies InitiativesResponse;
+	return json(initiativesWithTagsAndVotes);
 };
