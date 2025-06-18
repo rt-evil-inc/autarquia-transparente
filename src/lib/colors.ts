@@ -76,6 +76,34 @@ export function getTagClasses(tagColor: string | null): string {
 	return colorConfig ? `${colorConfig.bg} ${colorConfig.text} ${colorConfig.border} border` : 'bg-blue-50 text-blue-700 border-blue-200 border';
 }
 
+export function getSelectedTagClasses(tagColor: string | null): string {
+	// Handle null values - use default
+	if (!tagColor) {
+		const defaultColor = getDefaultTagColor();
+		return `text-xs px-2 py-1 rounded-full ${defaultColor.bg} ${defaultColor.text} ${defaultColor.border} border`;
+	}
+
+	// First try to find by hex (for backward compatibility)
+	let colorConfig = getTagColorByHex(tagColor);
+
+	// If not found, try by name
+	if (!colorConfig) {
+		colorConfig = getTagColorByName(tagColor);
+	}
+
+	if (colorConfig) {
+		// Use the full color for selected state
+		return `text-xs px-2 py-1 rounded-full ${colorConfig.bg} ${colorConfig.text} ${colorConfig.border} border`;
+	}
+
+	return 'text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 border-blue-200 border';
+}
+
+export function getNeutralTagClasses(): string {
+	// Neutral styling for unselected tags
+	return 'text-xs px-2 py-1 rounded-full bg-gray-50 text-gray-600 border-gray-200 border';
+}
+
 export function getDefaultTagColor(): TagColor {
 	return TAG_COLORS[0]; // Default to blue
 }

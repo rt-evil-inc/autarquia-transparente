@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { TAG_COLORS, getTagClasses, getTagColorByName } from '$lib/colors';
+	import { invalidate } from '$app/navigation';
+	import { TAG_COLORS, getSelectedTagClasses, getNeutralTagClasses, getTagColorByName } from '$lib/colors';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
@@ -46,12 +47,18 @@
 				}),
 			});
 
-			const data = await response.json();
+			const data: {success:boolean, tag?:number} = await response.json();
 
-			if (response.ok) {
+			if (response.ok && data.tag) {
 				// Add the new tag to the list and select it
-				tags = [...tags, data.tag];
-				selectedTags = [...selectedTags, data.tag.id];
+				const newTag = {
+					id: data.tag,
+					name: newTagName.trim(),
+					color: selectedColor?.name || 'blue',
+					created_at: null,
+				};
+				tags = [...tags, newTag];
+				selectedTags = [...selectedTags, newTag.id];
 
 				// Reset form
 				newTagName = '';
@@ -170,7 +177,7 @@
 			<button
 				type="button"
 				onclick={() => toggleTag(tag.id)}
-				class="px-3 py-1 rounded-full text-sm border transition-all duration-200 {getTagClasses(tag.color)} {selectedTags.includes(tag.id) ? 'ring-2 ring-blue-500 bg-blue-100' : ''}"
+				class="transition-all duration-200 {selectedTags.includes(tag.id) ? getSelectedTagClasses(tag.color) : getNeutralTagClasses()}"
 			>
 				{tag.name}
 			</button>

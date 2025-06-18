@@ -6,7 +6,7 @@
 	import TagManager from './TagManager.svelte';
 	import DocumentManager from './DocumentManager.svelte';
 	import InitiativeStatusInfo from './InitiativeStatusInfo.svelte';
-	import InitiativeActions from './InitiativeActions.svelte';
+	import InitiativeActions from './InitiativeSubmitSave.svelte';
 	import MeetingInfo from './MeetingInfo.svelte';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
 
