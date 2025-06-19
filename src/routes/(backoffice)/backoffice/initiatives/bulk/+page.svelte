@@ -8,6 +8,7 @@
 	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Progress } from '$lib/components/ui/progress';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
+	import SelectAutarchy from '$lib/components/SelectAutarchy.svelte';
 
 	// Types
 	interface Initiative {
@@ -32,6 +33,7 @@
 		notes: string;
 	}
 
+	let { data } = $props();
 	// File upload state
 	let fileInput: FileList | undefined = $state(undefined);
 	let selectedFile: File | null = $state(null);
@@ -582,19 +584,7 @@
 							<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div>
 									<Label for="parish">Freguesia *</Label>
-									<Select.Root type='single' bind:value={selectedParish}>
-										<Select.Trigger>
-											{selectedParish ? 'Freguesia selecionada' : 'Selecionar freguesia'}
-										</Select.Trigger>
-										<Select.Content>
-											<Select.Group>
-												<Select.Label>Freguesias</Select.Label>
-												<Select.Item value="1" label="Lisboa">Lisboa</Select.Item>
-												<Select.Item value="2" label="Porto">Porto</Select.Item>
-												<!-- Add more parishes as needed -->
-											</Select.Group>
-										</Select.Content>
-									</Select.Root>
+									<SelectAutarchy parishes={data.parishes} bind:selectedParish={selectedParish} />
 								</div>
 
 								<div>
