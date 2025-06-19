@@ -42,11 +42,13 @@ export const load = async ({ url, fetch }) => {
 	const parish = url.searchParams.get('parish');
 	const category = url.searchParams.get('category');
 	const tag = url.searchParams.get('tag');
+	const page = url.searchParams.get('page');
 
 	if (searchTerm) searchParams.append('search', searchTerm);
 	if (parish) searchParams.append('parish', parish);
 	if (category) searchParams.append('category', category);
 	if (tag) searchParams.append('tag', tag);
+	if (page) searchParams.append('page', page);
 
 	// Load initiatives with filters
 	const initiativesUrl = `/api/initiatives${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
@@ -66,14 +68,18 @@ export const load = async ({ url, fetch }) => {
 		throw error(500, 'Failed to load filter data');
 	}
 
-	const [initiatives, parishes, tags]:[InitiativesResponse, Parish[], Tag[]] = await Promise.all([
+	const [initiativesData, parishes, tags]: [InitiativesResponse, Parish[], Tag[]] = await Promise.all([
 		initiativesResponse.json(),
 		parishesResponse.json(),
 		tagsResponse.json(),
 	]);
 
 	return {
-		initiatives,
+		initiatives: initiativesData.initiatives,
+		totalCount: initiativesData.totalCount,
+		totalPages: initiativesData.totalPages,
+		currentPage: initiativesData.currentPage,
+		perPage: initiativesData.perPage,
 		parishes,
 		tags,
 		// Current filter values from URL
@@ -82,6 +88,7 @@ export const load = async ({ url, fetch }) => {
 			selectedParish: parish || '',
 			selectedCategory: category || '',
 			selectedTag: tag || '',
+			page: page ? parseInt(page, 10) : 1,
 		},
 	};
 };

@@ -7,17 +7,14 @@
 		class: className,
 		children,
 		...restProps
-	}: WithElementRef<HTMLAttributes<HTMLDivElement>> = $props();
+	}: WithElementRef<HTMLAttributes<HTMLUListElement>> = $props();
 </script>
 
-<div
+<ul
 	bind:this={ref}
-	data-slot="alert-description"
-	class={cn(
-		'text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
-		className,
-	)}
+	data-slot="pagination-content"
+	class={cn('flex flex-row items-center gap-1', className)}
 	{...restProps}
 >
 	{@render children?.()}
-</div>
+</ul>

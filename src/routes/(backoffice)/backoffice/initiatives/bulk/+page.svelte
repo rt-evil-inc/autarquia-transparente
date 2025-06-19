@@ -123,7 +123,6 @@
 
 			// Build content from description and themes
 			let content = descricao;
-			if (descricao) content += `${descricao}\n\n`;
 			if (situacaoAtual) content += `Situação Atual: ${situacaoAtual}\n\n`;
 			let tags = temas.split(',').map(tag => tag.trim()).filter(tag => tag);
 			tags.forEach(tag => {

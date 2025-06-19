@@ -39,7 +39,6 @@ export interface ParishInitiativeResponse {
   title: string;
   description: string;
   content: string;
-  category: string;
   status: 'draft' | 'pending' | 'approved' | 'rejected';
   parish_id: number;
   created_by: number;
@@ -64,7 +63,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	}
 
 	const contentType = request.headers.get('content-type') || '';
-	let title, description, content, category, tags, status, votes, file;
+	let title, description, content, tags, status, votes, file;
 	let proposalNumber, proposalType, meetingNumber, meetingDate, meetingType, meetingNotes, proposalFile;
 
 	if (contentType.includes('multipart/form-data')) {
@@ -73,7 +72,6 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		title = formData.get('title') as string;
 		description = formData.get('description') as string;
 		content = formData.get('content') as string;
-		category = formData.get('category') as string;
 		status = formData.get('status') as string;
 		tags = formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [];
 		votes = formData.get('votes') ? JSON.parse(formData.get('votes') as string) : [];

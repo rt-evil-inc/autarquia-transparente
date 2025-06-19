@@ -2,7 +2,6 @@
 	import SelectAutarchy from '../lib/components/SelectAutarchy.svelte';
 
 	import { goto } from '$app/navigation';
-	import Masonry from '$lib/components/Masonry.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import {
@@ -14,6 +13,10 @@
 	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
+	import * as Pagination from '$lib/components/ui/pagination';
+	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
+	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import { MediaQuery } from 'svelte/reactivity';
 	import branding from '$lib/config/branding.js';
 	import { calculateVotingResult } from '$lib/voting';
 	import { untrack } from 'svelte';
@@ -23,20 +26,29 @@
 	let initiatives = $derived(data.initiatives);
 	let parishes = $derived(data.parishes);
 	let tags = $derived(data.tags);
+	let totalCount = $derived(data.totalCount);
+	let totalPages = $derived(data.totalPages);
+	let currentPage = $derived(data.currentPage);
+	let perPage = $derived(data.perPage);
 
 	let searchTerm = $derived(data.filters.searchTerm);
 	let selectedParish = $derived(data.filters.selectedParish);
 	let selectedTag = $derived(data.filters.selectedTag);
+
+	// Pagination setup for UI
+	const isDesktop = new MediaQuery('(min-width: 768px)');
+	const siblingCount = $derived(isDesktop.current ? 1 : 0);
 	// auto search if selectedParish or selectedTag is set
 	$effect(() => {
-		performSearch(untrack(() => searchTerm), selectedParish, selectedTag);
+		performSearch(untrack(() => searchTerm), selectedParish, selectedTag, currentPage);
 	});
 
-	function performSearch(searchTerm: string, selectedParish: string, selectedTag: string) {
+	function performSearch(searchTerm: string, selectedParish: string, selectedTag: string, page: number = 1) {
 		const params = new URLSearchParams;
 		if (searchTerm.trim()) params.append('search', searchTerm.trim());
 		if (selectedParish) params.append('parish', selectedParish);
 		if (selectedTag) params.append('tag', selectedTag);
+		if (page > 1) params.append('page', page.toString());
 
 		const newUrl = params.toString() ? `/?${params.toString()}` : '/';
 		goto(newUrl);
@@ -44,7 +56,7 @@
 
 	function handleSearch(event: Event) {
 		event.preventDefault();
-		performSearch(searchTerm, selectedParish, selectedTag);
+		performSearch(searchTerm, selectedParish, selectedTag, 1); // Reset to page 1 on search
 	}
 
 	function clearFilters() {
@@ -52,6 +64,10 @@
 		selectedParish = '';
 		selectedTag = '';
 		goto('/');
+	}
+
+	function handlePageChange(page: number) {
+		performSearch(searchTerm, selectedParish, selectedTag, page);
 	}
 
 	function formatDate(dateStr: string | Date | null) {
@@ -161,18 +177,19 @@
 			<div class="text-gray-600">Nenhuma iniciativa encontrada.</div>
 		</div>
 	{:else}
+		<!-- Results count -->
+		<div class="mb-4 text-sm text-gray-600">
+			{((currentPage - 1) * perPage) + 1}-{Math.min(currentPage * perPage, totalCount)} de {totalCount} iniciativas
+		</div>
+
 		<!-- Initiatives Grid -->
-		<!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> -->
-		<Masonry
-			gridGap="0.75rem"
-			colWidth="minmax(Min(20em, 100%), 1fr)"
-		>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 			{#each initiatives as initiative (initiative.id)}
-				<a href="/iniciativa/{initiative.id}" class="block group">
+				<a href="/iniciativa/{initiative.id}" class="block group h-full">
 					<Card
-						class="hover:shadow-lg transition-shadow cursor-pointer"
+						class="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col"
 					>
-						<CardHeader>
+						<CardHeader class="flex-shrink-0">
 							<div class="flex items-start justify-between">
 								<div class="flex-1">
 									<CardTitle
@@ -187,7 +204,7 @@
 							</div>
 						</CardHeader>
 
-						<CardContent>
+						<CardContent class="flex-1 flex flex-col">
 							{#if initiative.description}
 								<p
 									class="text-gray-600 text-sm mb-4 line-clamp-3"
@@ -206,7 +223,7 @@
 							{/if}
 
 							<!-- Meta Info -->
-							<div class="text-xs text-gray-500 space-y-1">
+							<div class="text-xs text-gray-500 space-y-1 mt-auto">
 								{#if initiative.votes && initiative.votes.length > 0}
 									{@const votingResult = calculateVotingResult(initiative.votes)}
 									<div class="flex items-center gap-2">
@@ -231,8 +248,57 @@
 					</Card>
 				</a>
 			{/each}
-			<!-- </div> -->
-		</Masonry>
+		</div>
+
+		<!-- Pagination -->
+		{#if totalPages > 1}
+			<div class="mt-8 flex justify-center">
+				<Pagination.Root
+					count={totalCount}
+					{perPage}
+					{siblingCount}
+					page={currentPage}
+				>
+					{#snippet children({ pages, currentPage: paginationCurrentPage })}
+						<Pagination.Content>
+							<Pagination.Item>
+								<Pagination.PrevButton
+									onclick={() => handlePageChange(Math.max(1, currentPage - 1))}
+								>
+									<ChevronLeftIcon class="size-4" />
+									<span class="hidden sm:block">Anterior</span>
+								</Pagination.PrevButton>
+							</Pagination.Item>
+							{#each pages as page (page.key)}
+								{#if page.type === 'ellipsis'}
+									<Pagination.Item>
+										<Pagination.Ellipsis />
+									</Pagination.Item>
+								{:else}
+									<Pagination.Item>
+										<Pagination.Link
+											{page}
+											isActive={paginationCurrentPage === page.value}
+											onclick={() => handlePageChange(page.value)}
+										>
+											{page.value}
+										</Pagination.Link>
+									</Pagination.Item>
+								{/if}
+							{/each}
+							<Pagination.Item>
+								<Pagination.NextButton
+									onclick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+								>
+									<span class="hidden sm:block">Próxima</span>
+									<ChevronRightIcon class="size-4" />
+								</Pagination.NextButton>
+							</Pagination.Item>
+						</Pagination.Content>
+					{/snippet}
+				</Pagination.Root>
+			</div>
+		{/if}
 	{/if}
 </main>
 
