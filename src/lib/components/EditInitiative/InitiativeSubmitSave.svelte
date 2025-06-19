@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button/index.js';
+	import { Button } from '$lib/components/ui/button';
 	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
 
 	let {

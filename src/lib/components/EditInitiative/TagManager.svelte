@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { invalidate } from '$app/navigation';
-	import { TAG_COLORS, getSelectedTagClasses, getNeutralTagClasses, getTagColorByName } from '$lib/colors';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
+	import { TAG_COLORS, getNeutralTagClasses, getSelectedTagClasses, getTagColorByName } from '$lib/colors';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import * as Select from '$lib/components/ui/select';
 	import type { Tag } from '$lib/server/database';
 
 	let { tags = $bindable(), selectedTags = $bindable(), error = $bindable() }: {

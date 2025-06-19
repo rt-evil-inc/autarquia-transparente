@@ -5,7 +5,7 @@
 		CardDescription,
 		CardHeader,
 		CardTitle,
-	} from '$lib/components/ui/card/index.js';
+	} from '$lib/components/ui/card';
 	import branding from '$lib/config/branding.js';
 
 	let { data } = $props();

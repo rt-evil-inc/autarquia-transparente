@@ -4,7 +4,7 @@
 		CardContent,
 		CardHeader,
 		CardTitle,
-	} from '$lib/components/ui/card/index.js';
+	} from '$lib/components/ui/card';
 
 	let { data } = $props();
 	let autarca = $derived(data.autarca);

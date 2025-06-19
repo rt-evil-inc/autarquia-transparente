@@ -3,7 +3,7 @@
 	import PdfView from './PdfView.svelte';
 	import MeetingInfoCard from './MeetingInfoCard.svelte';
 	import InfoIcon from '@lucide/svelte/icons/info';
-	import * as HoverCard from '$lib/components/ui/hover-card/index.js';
+	import * as HoverCard from '$lib/components/ui/hover-card';
 
 	import {
 		Card,
@@ -11,8 +11,8 @@
 		CardDescription,
 		CardHeader,
 		CardTitle,
-	} from '$lib/components/ui/card/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
+	} from '$lib/components/ui/card';
+	import { Button } from '$lib/components/ui/button';
 	import { getTagClasses } from '$lib/colors';
 	import { calculateVotingResult, getVoteStatistics } from '$lib/voting';
 	import branding from '$lib/config/branding';

@@ -8,7 +8,7 @@
 	import InitiativeStatusInfo from './InitiativeStatusInfo.svelte';
 	import InitiativeActions from './InitiativeSubmitSave.svelte';
 	import MeetingInfo from './MeetingInfo.svelte';
-	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card/index.js';
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	let { initiative, tags }:{initiative?: FullInitiativeResponse, tags: Tag[] } = $props();
 

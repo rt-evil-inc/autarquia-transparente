@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto, invalidateAll } from '$app/navigation';
-	import * as Drawer from '$lib/components/ui/drawer/index.js';
-	import * as NavigationMenu from '$lib/components/ui/navigation-menu/index.js';
+	import * as Drawer from '$lib/components/ui/drawer';
+	import * as NavigationMenu from '$lib/components/ui/navigation-menu';
 	import Icon from '$lib/config/icon.svelte';
 	import EditIcon from '@lucide/svelte/icons/edit';
 	import FileTextIcon from '@lucide/svelte/icons/file-text';

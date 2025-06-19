@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
+	import { Button } from '$lib/components/ui/button';
+	import { Label } from '$lib/components/ui/label';
 	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
 	import Input from '../ui/input/input.svelte';
 

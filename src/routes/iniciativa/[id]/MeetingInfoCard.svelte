@@ -5,7 +5,7 @@
 		CardDescription,
 		CardHeader,
 		CardTitle,
-	} from '$lib/components/ui/card/index.js';
+	} from '$lib/components/ui/card';
 
 	interface Initiative {
 		proposal_number: string | null;
