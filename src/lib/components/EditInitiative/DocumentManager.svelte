@@ -24,7 +24,7 @@
 		}
 
 		try {
-			const response = await fetch(`/api/backoffice/parish/initiatives/${initiative?.id}/documents/${documentId}`, {
+			const response = await fetch(`/api/backoffice/initiatives/${initiative?.id}/documents/${documentId}`, {
 				method: 'DELETE',
 			});
 

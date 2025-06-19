@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import branding from '$lib/config/branding';
 	import type { Parish, Tag } from '$lib/server/database';
-	import { isConfig } from 'drizzle-orm';
 	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
 	import SelectAutarchy from '../SelectAutarchy.svelte';
 	import DocumentManager from './DocumentManager.svelte';
@@ -11,7 +11,6 @@
 	import MeetingInfo from './MeetingInfo.svelte';
 	import TagManager from './TagManager.svelte';
 	import VoteEditor from './VoteEditor.svelte';
-	import branding from '$lib/config/branding';
 
 	let { initiative, tags, parishes, defaultParish }:{initiative?: FullInitiativeResponse, tags: Tag[], parishes: Parish[], defaultParish?: string } = $props();
 
@@ -54,57 +53,32 @@
 		try {
 			let response;
 			const url = isEditMode ?
-				`/api/backoffice/parish/initiatives/${initiativeId}` :
-					'/api/backoffice/parish/initiatives';
+				`/api/backoffice/initiatives/${initiativeId}` :
+					'/api/backoffice/initiatives';
 			const method = isEditMode ? 'PUT' : 'POST';
 
-			if (selectedFile || proposalDocument) {
-				// Use FormData for file upload
-				const formData = new FormData;
-				formData.append('title', title.trim());
-				formData.append('description', description.trim());
-				formData.append('content', content.trim());
-				formData.append('tags', JSON.stringify(selectedTags));
-				formData.append('status', status);
-				formData.append('votes', JSON.stringify(votes));
-				if (selectedFile) formData.append('document', selectedFile);
-				if (proposalDocument) formData.append('proposalDocument', proposalDocument);
-				// Meeting fields
-				formData.append('proposalNumber', proposalNumber || '');
-				formData.append('proposalType', proposalType || '');
-				formData.append('meetingNumber', meetingNumber?.toString() || '');
-				formData.append('meetingDate', meetingDate || '');
-				formData.append('meetingType', meetingType || '');
-				formData.append('meetingNotes', meetingNotes || '');
+			// Use FormData for file upload
+			const formData = new FormData;
+			formData.append('title', title.trim());
+			formData.append('description', description.trim());
+			formData.append('content', content.trim());
+			formData.append('tags', JSON.stringify(selectedTags));
+			formData.append('status', status);
+			formData.append('votes', JSON.stringify(votes));
+			if (selectedFile) formData.append('document', selectedFile);
+			if (proposalDocument) formData.append('proposalDocument', proposalDocument);
+			// Meeting fields
+			formData.append('proposalNumber', proposalNumber || '');
+			formData.append('proposalType', proposalType || '');
+			formData.append('meetingNumber', meetingNumber?.toString() || '');
+			formData.append('meetingDate', meetingDate || '');
+			formData.append('meetingType', meetingType || '');
+			formData.append('meetingNotes', meetingNotes || '');
 
-				response = await fetch(url, {
-					method,
-					body: formData,
-				});
-			} else {
-				// Use JSON for no file upload
-				response = await fetch(url, {
-					method,
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						title: title.trim(),
-						description: description.trim(),
-						content: content.trim(),
-						tags: selectedTags,
-						status,
-						votes: votes,
-						// Meeting fields
-						proposalNumber: proposalNumber || null,
-						proposalType: proposalType || null,
-						meetingNumber: meetingNumber || null,
-						meetingDate: meetingDate || null,
-						meetingType: meetingType || null,
-						meetingNotes: meetingNotes || null,
-					}),
-				});
-			}
+			response = await fetch(url, {
+				method,
+				body: formData,
+			});
 
 			const responseData = await response.json();
 

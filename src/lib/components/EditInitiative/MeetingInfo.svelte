@@ -4,6 +4,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Select from '$lib/components/ui/select';
 	import { Button } from '$lib/components/ui/button';
+	import { meetingTypeOptions, proposalTypeOptions } from '$lib';
 
 	let {
 		proposalNumber = $bindable(''),
@@ -24,17 +25,6 @@
 		proposalDocument: File | null,
 		proposalDocumentInput: FileList | undefined
 	} = $props();
-
-	const proposalTypeOptions = [
-		{ value: 'proposal', label: 'Proposta' },
-		{ value: 'amendment', label: 'Proposta de Alteração' },
-	];
-
-	const meetingTypeOptions = [
-		{ value: 'public', label: 'Pública' },
-		{ value: 'private', label: 'Privada' },
-		{ value: 'extraordinary', label: 'Extraordinária' },
-	];
 
 	// Validate proposal number format (e.g., "37/2025" or "37-A/2025")
 	function validateProposalNumber(value: string): boolean {

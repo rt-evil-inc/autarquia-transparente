@@ -1,4 +1,4 @@
-import type { InitiativeWithTags } from '../../api/backoffice/parish/initiatives/+server';
+import type { InitiativeWithTags } from '../../api/backoffice/initiatives/+server';
 import type { Parish } from '$lib/server/database';
 import { error, redirect } from '@sveltejs/kit';
 import type { User } from '$lib/auth';

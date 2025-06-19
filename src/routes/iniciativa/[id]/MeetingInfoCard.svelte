@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { meetingTypeOptions, proposalTypeOptions } from '$lib';
 	import {
 		Card,
 		CardContent,
@@ -30,7 +31,7 @@
 		<CardHeader>
 			<CardTitle>Informação da Reunião</CardTitle>
 			<CardDescription>
-				Detalhes sobre a proposta e reunião da Assembleia de Freguesia
+				Detalhes sobre a proposta e reunião da Assembleia
 			</CardDescription>
 		</CardHeader>
 		<CardContent>
@@ -48,7 +49,7 @@
 						{#if initiative.proposal_type}
 							<div>
 								<span class="text-sm font-medium text-gray-600">Tipo de Proposta:</span>
-								<p class="text-gray-900 capitalize">{initiative.proposal_type}</p>
+								<p class="text-gray-900 capitalize">{proposalTypeOptions.find(option => option.value === initiative.proposal_type)?.label}</p>
 							</div>
 						{/if}
 					</div>
@@ -73,7 +74,7 @@
 						{#if initiative.meeting_type}
 							<div>
 								<span class="text-sm font-medium text-gray-600">Tipo de Reunião:</span>
-								<p class="text-gray-900 capitalize">{initiative.meeting_type}</p>
+								<p class="text-gray-900 capitalize">{meetingTypeOptions.find(option => option.value === initiative.meeting_type)?.label}</p>
 							</div>
 						{/if}
 					</div>

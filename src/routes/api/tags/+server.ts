@@ -19,7 +19,6 @@ export const GET: RequestHandler = async () => {
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		// Check if user is authenticated (both admin and parish can create tags)
 		if (!locals.user) {
 			return json({ error: 'Authentication required' }, { status: 401 });
 		}

@@ -224,23 +224,32 @@ export const queries = {	// User functions
 		return result.id;
 	},
 
-	createInitiativeFull: (data: NewInitiative) => {
+	createInitiativeFull: (initiative: NewInitiative, tagIds?: number[]) => {
 		const result = drizzleDb.insert(initiatives).values({
-			title: data.title,
-			description: data.description,
-			content: data.content,
-			parish_id: data.parish_id,
-			created_by: data.created_by,
-			status: data.status as 'draft' | 'submitted' | 'approved' | 'rejected',
-			submission_date: data.submission_date,
+			title: initiative.title,
+			description: initiative.description,
+			content: initiative.content,
+			parish_id: initiative.parish_id,
+			created_by: initiative.created_by,
+			status: initiative.status as 'draft' | 'submitted' | 'approved' | 'rejected',
+			submission_date: initiative.submission_date,
 			// Meeting fields
-			proposal_number: data.proposal_number,
-			proposal_type: data.proposal_type as 'proposal' | 'amendment' | null,
-			meeting_number: data.meeting_number,
-			meeting_date: data.meeting_date,
-			meeting_type: data.meeting_type as 'public' | 'private' | 'extraordinary' | null,
-			meeting_notes: data.meeting_notes,
+			proposal_number: initiative.proposal_number,
+			proposal_type: initiative.proposal_type as 'proposal' | 'amendment' | null,
+			meeting_number: initiative.meeting_number,
+			meeting_date: initiative.meeting_date,
+			meeting_type: initiative.meeting_type as 'public' | 'private' | 'extraordinary' | null,
+			meeting_notes: initiative.meeting_notes,
 		}).returning({ id: initiatives.id }).get();
+
+		if (tagIds && tagIds.length > 0) {
+			drizzleDb.insert(initiative_tags).values(
+				tagIds.map(tagId => ({
+					initiative_id: result.id,
+					tag_id: tagId,
+				})),
+			).run();
+		}
 		return result.id;
 	},
 
@@ -319,7 +328,7 @@ export const queries = {	// User functions
 			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id));
 
 		// Apply filters
-		const conditions = [eq(initiatives.status, 'approved')];
+		const conditions = [];
 
 		if (search) {
 			conditions.push(
@@ -339,7 +348,7 @@ export const queries = {	// User functions
 	},
 
 	searchInitiativesWithTag: (search: string | null, tag_name: string, parish_code: string | null) => {
-		const conditions = [eq(initiatives.status, 'approved'), eq(tags.name, tag_name)];
+		const conditions = [eq(tags.name, tag_name)];
 
 		if (search) {
 			conditions.push(
@@ -562,5 +571,43 @@ export const queries = {	// User functions
 			.where(eq(initiative_documents.id, id)).get();
 
 		return result || undefined;
+	},
+
+	deleteAllInitiatives: (): { deleted: number; errors: number } => {
+		let deleted = 0;
+		let errors = 0;
+
+		try {
+			// Get all initiatives
+			const allInitiatives = drizzleDb.select().from(initiatives).all();
+
+			// Get all documents to delete physical files
+			const allDocuments = drizzleDb.select().from(initiative_documents).all();
+
+			// Delete physical files
+			for (const document of allDocuments) {
+				try {
+					if (fs.existsSync(document.file_path)) {
+						fs.unlinkSync(document.file_path);
+					}
+				} catch (error) {
+					console.error('Error deleting file:', error);
+					errors++;
+				}
+			}
+
+			// Delete all related data in correct order
+			drizzleDb.delete(votes).run();
+			drizzleDb.delete(initiative_tags).run();
+			drizzleDb.delete(initiative_documents).run();
+			drizzleDb.delete(initiatives).run();
+
+			deleted = allInitiatives.length;
+
+			return { deleted, errors };
+		} catch (error) {
+			console.error('Error deleting all initiatives:', error);
+			return { deleted: 0, errors: 1 };
+		}
 	},
 };

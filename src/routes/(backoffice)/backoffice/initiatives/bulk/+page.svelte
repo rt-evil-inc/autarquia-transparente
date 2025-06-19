@@ -1,31 +1,18 @@
 <script lang="ts">
+	import SelectAutarchy from '$lib/components/SelectAutarchy.svelte';
+	import { Alert, AlertDescription } from '$lib/components/ui/alert';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import * as Select from '$lib/components/ui/select';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Alert, AlertDescription } from '$lib/components/ui/alert';
 	import { Progress } from '$lib/components/ui/progress';
+	import * as Select from '$lib/components/ui/select';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
-	import SelectAutarchy from '$lib/components/SelectAutarchy.svelte';
+	import type { InitiativeCreateData } from '../../../../api/backoffice/initiatives/+server.js';
+	import { parseCSV } from './bulk.js';
 
 	// Types
-	interface Initiative {
-		title: string;
-		description: string;
-		content: string;
-		parish_id: number | null;
-		status: string;
-		proposal_number: string;
-		proposal_type: string;
-		meeting_date: string;
-		meeting_type: string;
-		meeting_notes: string;
-		votes: Vote[];
-		_originalRow: string[];
-		_rowIndex: number;
-	}
 
 	interface Vote {
 		voter_name: string;
@@ -38,7 +25,7 @@
 	let fileInput: FileList | undefined = $state(undefined);
 	let selectedFile: File | null = $state(null);
 	let csvContent = $state('');
-	let parsedData: Initiative[] = $state([]);
+	let parsedData: InitiativeCreateData[] = $state([]);
 	let isProcessing = $state(false);
 	let error = $state('');
 	let success = $state('');
@@ -47,71 +34,17 @@
 	// Preview state
 	let showPreview = $state(false);
 	let selectedParish = $state('');
-	let defaultMeetingType = $state('private');
-	let defaultProposalType = $state('proposal');
+	let defaultMeetingType = $state<'public'|'private'|'extraordinary'>('private');
+	let defaultProposalType = $state<'proposal'|'amendment'>('proposal');
 
-	// CSV parsing functions
-	function parseCSV(text: string): string[][] {
-		const lines = text.split('\n');
-		const result: string[][] = [];
-		let currentRow: string[] = [];
-		let currentField = '';
-		let inQuotes = false;
-
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-
-			for (let j = 0; j < line.length; j++) {
-				const char = line[j];
-
-				if (char === '"') {
-					if (inQuotes && line[j + 1] === '"') {
-						// Escaped quote
-						currentField += '"';
-						j++; // Skip next quote
-					} else {
-						// Toggle quote state
-						inQuotes = !inQuotes;
-					}
-				} else if (char === ';' && !inQuotes) {
-					// Field separator
-					currentRow.push(currentField.trim());
-					currentField = '';
-				} else {
-					currentField += char;
-				}
-			}
-
-			// End of line
-			if (!inQuotes) {
-				currentRow.push(currentField.trim());
-				if (currentRow.some(field => field.length > 0)) {
-					result.push(currentRow);
-				}
-				currentRow = [];
-				currentField = '';
-			} else {
-				// Multi-line field, add newline
-				currentField += '\n';
-			}
-		}
-
-		// Add last row if not empty
-		if (currentRow.length > 0 || currentField.length > 0) {
-			currentRow.push(currentField.trim());
-			result.push(currentRow);
-		}
-
-		return result;
-	}
-
-	function convertCSVToInitiatives(csvData: string[][]): Initiative[] {
+	async function convertCSVToInitiatives(csvData: string[][]): Promise<InitiativeCreateData[]> {
 		if (csvData.length === 0) return [];
 
 		// Expected headers: Nº da Reunião (votação),Tipo de Reunião (votação),Data da Reunião (votação),Media,Tipo de Proposta,Nº,Nome da proposta,Descrição,Temas,Resultado,Situação Atual,DOC,PDF,Boletim Municipal,Notas
 		const dataRows = csvData.slice(1);
+		const tagsSet = new Set<string>;
 
-		return dataRows.map((row, index) => {
+		let initiatives = await Promise.all(dataRows.map(async (row, index) => {
 			const [
 				numeroReuniao,
 				tipoReuniao,
@@ -161,7 +94,8 @@
 				const tipo = tipoProposta.toLowerCase();
 				if (tipo.includes('proposta')) {
 					proposalType = 'proposal';
-				} else if (tipo.includes('alteração') || tipo.includes('emenda')) {
+				}
+				if (tipo.includes('alteração') || tipo.includes('emenda')) {
 					proposalType = 'amendment';
 				}
 			}
@@ -187,132 +121,49 @@
 				}
 			}
 
-			// Build meeting notes
-			let meetingNotes = '';
-			if (temas) meetingNotes += `Temas: ${temas}\n`;
-			if (resultado) meetingNotes += `Resultado: ${resultado}\n`;
-			if (situacaoAtual) meetingNotes += `Situação Atual: ${situacaoAtual}\n`;
-			if (doc) meetingNotes += `DOC: ${doc}\n`;
-			if (pdf) meetingNotes += `PDF: ${pdf}\n`;
-			if (boletimMunicipal) meetingNotes += `Boletim Municipal: ${boletimMunicipal}\n`;
-			if (notas) meetingNotes += `Notas: ${notas}\n`;
-			if (media) meetingNotes += `Media: ${media}\n`;
-
 			// Build content from description and themes
-			let content = '';
+			let content = descricao;
 			if (descricao) content += `${descricao}\n\n`;
-			if (temas) content += `Temas: ${temas}\n`;
-			if (resultado) content += `\nResultado: ${resultado}`;
+			if (situacaoAtual) content += `Situação Atual: ${situacaoAtual}\n\n`;
+			let tags = temas.split(',').map(tag => tag.trim()).filter(tag => tag);
+			tags.forEach(tag => {
+				tagsSet.add(tag);
+			});
 
 			return {
 				// Basic initiative data
 				title: nomeProposta || `Proposta ${proposalNumber || index + 1}`,
 				description: descricao || nomeProposta || '',
 				content: content.trim() || nomeProposta || '',
-				parish_id: null, // Will be set when importing
 				status: resultado?.toLowerCase().includes('aprovad') ? 'approved' : 'rejected',
 
 				// Meeting data
 				proposal_number: proposalNumber,
 				proposal_type: proposalType,
+				meeting_number: 0,
 				meeting_date: meetingDate,
-				meeting_type: tipoReuniao?.toLowerCase() === 'privada' ? 'private' : defaultMeetingType,
-				meeting_notes: meetingNotes.trim(),
+				meeting_type: tipoReuniao?.toLowerCase() === 'privada' as const ? 'private' as const : defaultMeetingType,
+				meeting_notes: notas.trim(),
 
 				// Vote data
 				votes: votes,
+				tags: tags, // Tags will be handled separately
+				parish_id: 0, // TODO
 
-				// Metadata
-				_originalRow: row,
-				_rowIndex: index + 1,
-			};
-		});
-	}
-	// Encoding detection and conversion
-	function detectAndConvertEncoding(buffer: ArrayBuffer): string {
-		// Try to decode as UTF-8 first
-		try {
-			const decoder = new TextDecoder('utf-8', { fatal: true });
-			const utf8Text = decoder.decode(buffer);
-			// If successful and contains Portuguese characters, it's likely UTF-8
-			return utf8Text;
-		} catch {
-			// UTF-8 failed, try ISO 8859-1 (Latin-1)
-			try {
-				const decoder = new TextDecoder('iso-8859-1');
-				const latin1Text = decoder.decode(buffer);
-				console.log('Detected ISO 8859-1 encoding, converting to UTF-8');
-				return latin1Text;
-			} catch {
-				// Fallback to Windows-1252 which is similar to ISO 8859-1
-				try {
-					const decoder = new TextDecoder('windows-1252');
-					const windowsText = decoder.decode(buffer);
-					console.log('Detected Windows-1252 encoding, converting to UTF-8');
-					return windowsText;
-				} catch {
-					// Final fallback - try to read as binary and convert manually
-					console.warn('Could not detect encoding, using binary fallback');
-					const uint8Array = new Uint8Array(buffer);
-					let result = '';
-					for (let i = 0; i < uint8Array.length; i++) {
-						result += String.fromCharCode(uint8Array[i]);
-					}
-					return result;
-				}
-			}
-		}
-	}
-
-	function hasPortugueseChars(text: string): boolean {
-		// Check for common Portuguese characters that would be mangled in wrong encoding
-		const portugueseChars = /[áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ]/;
-		return portugueseChars.test(text);
-	}
-
-	function validateAndFixEncoding(text: string): string {
-		// Common ISO 8859-1 to UTF-8 character mappings for Portuguese
-		// Using a more robust approach with replacements
-		let fixedText = text;
-
-		// Define replacements as array of [search, replace] pairs
-		const replacements = [
-			// Lowercase accented characters
-			['Ã¡', 'á'],
-			['Ã ', 'à'],
-			['Ã¢', 'â'],
-			['Ã£', 'ã'],
-			['Ã¤', 'ä'],
-			['Ã©', 'é'],
-			['Ã¨', 'è'],
-			['Ãª', 'ê'],
-			['Ã«', 'ë'],
-			['Ã­', 'í'],
-			['Ã¬', 'ì'],
-			['Ã®', 'î'],
-			['Ã¯', 'ï'],
-			['Ã³', 'ó'],
-			['Ã²', 'ò'],
-			['Ã´', 'ô'],
-			['Ãµ', 'õ'],
-			['Ã¶', 'ö'],
-			['Ãº', 'ú'],
-			['Ã¹', 'ù'],
-			['Ã»', 'û'],
-			['Ã¼', 'ü'],
-			['Ã§', 'ç'],
-			['Ã±', 'ñ'],
-			// Some common uppercase patterns (simplified)
-			['Ã\u0087', 'Ç'],
-			['Ã\u0091', 'Ñ'],
-		];
-
-		// Apply character mappings
-		for (const [wrongChar, correctChar] of replacements) {
-			fixedText = fixedText.replaceAll(wrongChar, correctChar);
-		}
-
-		return fixedText;
+			} satisfies InitiativeCreateData;
+		}));
+		await Promise.all(Array.from(tagsSet).map(async tag => {
+			await fetch('/api/tags', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ name: tag }),
+			}).catch(err => {
+				console.error(`Erro ao criar tag "${tag}":`, err);
+			});
+		}));
+		return initiatives;
 	}
 
 	// File handling
@@ -337,13 +188,9 @@
 			}
 
 			// Detect and convert encoding
-			let decodedText = detectAndConvertEncoding(buffer);
 
-			// Check if the text looks like it has encoding issues and try to fix them
-			if (!hasPortugueseChars(decodedText) || decodedText.includes('Ã')) {
-				console.log('Attempting to fix encoding issues...');
-				decodedText = validateAndFixEncoding(decodedText);
-			}
+			const decoder = new TextDecoder('utf-8');
+			const decodedText = decoder.decode(buffer);
 
 			csvContent = decodedText;
 			parseCSVData();
@@ -351,13 +198,13 @@
 		reader.readAsArrayBuffer(file);
 	}
 
-	function parseCSVData() {
+	async function parseCSVData() {
 		if (!csvContent) return;
 
 		try {
 			error = '';
 			const csvRows = parseCSV(csvContent);
-			parsedData = convertCSVToInitiatives(csvRows);
+			parsedData = await convertCSVToInitiatives(csvRows);
 			showPreview = true;
 		} catch (e) {
 			error = `Erro ao processar CSV: ${e}`;
@@ -388,7 +235,7 @@
 				initiative.parish_id = parseInt(selectedParish);
 
 				try {
-					const response = await fetch('/api/backoffice/parish/initiatives', {
+					const response = await fetch('/api/backoffice/initiatives', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -530,7 +377,7 @@
 							<div class="bg-gray-50 p-4 rounded-lg">
 								<p class="text-sm font-mono mb-2">Cabeçalhos esperados:</p>
 								<code class="text-xs bg-white p-2 rounded block">
-									Nº da Reunião (votação),Tipo de Reunião (votação),Data da Reunião (votação),Media,Tipo de Proposta,Nº,Nome da proposta,Descrição,Temas,Resultado,Situação Atual,DOC,PDF,Boletim Municipal,Notas
+									Nº da Reunião (votação);Tipo de Reunião (votação);Data da Reunião (votação);Media;Tipo de Proposta;Nº;Nome da proposta;Descrição;Temas;Resultado;Situação Atual;DOC;PDF;Boletim Municipal;Notas
 								</code>
 							</div>
 							<div class="text-sm text-gray-600 space-y-1">
@@ -548,13 +395,6 @@
 								<p><strong>DOC/PDF:</strong> Links para documentos</p>
 								<p><strong>Boletim Municipal:</strong> Referência ao boletim municipal</p>
 								<p><strong>Notas:</strong> Notas adicionais sobre a votação</p>
-							</div>
-							<div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-								<h4 class="font-medium text-blue-900 mb-1">✨ Suporte de Codificação</h4>
-								<p class="text-sm text-blue-800">
-									O sistema detecta automaticamente a codificação do ficheiro (UTF-8, ISO 8859-1, Windows-1252)
-									e converte caracteres portugueses corretamente.
-								</p>
 							</div>
 						</div>
 
