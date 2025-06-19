@@ -1,4 +1,5 @@
 <script lang="ts">
+	import branding from '$lib/config/branding';
 	import CreateUser from './CreateUser.svelte';
 	import UserList from './UserList.svelte';
 
@@ -7,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>Admin Dashboard - Portal do Autarca</title>
+	<title>Admin Dashboard - {branding.siteName}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">

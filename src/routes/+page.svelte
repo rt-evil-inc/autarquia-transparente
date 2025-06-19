@@ -1,5 +1,8 @@
 <script lang="ts">
+	import SelectAutarchy from '../lib/components/SelectAutarchy.svelte';
+
 	import { goto } from '$app/navigation';
+	import Masonry from '$lib/components/Masonry.svelte';
 	import Tag from '$lib/components/Tag.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import {
@@ -9,11 +12,11 @@
 		CardHeader,
 		CardTitle,
 	} from '$lib/components/ui/card';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Input } from '$lib/components/ui/input';
+	import * as Select from '$lib/components/ui/select';
 	import branding from '$lib/config/branding.js';
 	import { calculateVotingResult } from '$lib/voting';
-	import Masonry from '$lib/components/Masonry.svelte';
+	import { untrack } from 'svelte';
 
 	let { data } = $props();
 
@@ -23,14 +26,16 @@
 
 	let searchTerm = $derived(data.filters.searchTerm);
 	let selectedParish = $derived(data.filters.selectedParish);
-	let selectedCategory = $derived(data.filters.selectedCategory);
 	let selectedTag = $derived(data.filters.selectedTag);
+	// auto search if selectedParish or selectedTag is set
+	$effect(() => {
+		performSearch(untrack(() => searchTerm), selectedParish, selectedTag);
+	});
 
-	function performSearch() {
+	function performSearch(searchTerm: string, selectedParish: string, selectedTag: string) {
 		const params = new URLSearchParams;
 		if (searchTerm.trim()) params.append('search', searchTerm.trim());
 		if (selectedParish) params.append('parish', selectedParish);
-		if (selectedCategory) params.append('category', selectedCategory);
 		if (selectedTag) params.append('tag', selectedTag);
 
 		const newUrl = params.toString() ? `/?${params.toString()}` : '/';
@@ -42,16 +47,14 @@
 		console.log('Performing search with params:', {
 			searchTerm,
 			selectedParish,
-			selectedCategory,
 			selectedTag,
 		});
-		performSearch();
+		performSearch(searchTerm, selectedParish, selectedTag);
 	}
 
 	function clearFilters() {
 		searchTerm = '';
 		selectedParish = '';
-		selectedCategory = '';
 		selectedTag = '';
 		goto('/');
 	}
@@ -59,12 +62,6 @@
 	function formatDate(dateStr: string | Date | null) {
 		if (!dateStr) return 'N/A';
 		return new Date(dateStr).toLocaleDateString('pt-PT');
-	}
-
-	function getSelectedParishName(): string {
-		if (!selectedParish) return 'Todas as autarquias';
-		const parish = parishes.find(p => p.code === selectedParish);
-		return parish?.name || 'Todas as autarquias';
 	}
 
 	function getSelectedTagName(): string {
@@ -108,58 +105,14 @@
 		</form>
 
 		<!-- Filter Options -->
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<div class="flex gap-4 w-full">
 			<div>
 				<label
 					for="parish-dropdown"
 					class="block text-sm font-medium text-gray-700 mb-2"
 				>Autarquia</label
 				>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger
-						id="parish-dropdown"
-						class={buttonVariants({
-							variant: 'outline',
-							class: 'justify-between',
-						})}
-					>
-						{getSelectedParishName()}
-						<svg
-							class="ml-2 h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 9l-7 7-7-7"
-							/>
-						</svg>
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content class="w-56">
-						<DropdownMenu.Item
-							onclick={() => {
-								selectedParish = '';
-								performSearch();
-							}}
-						>
-							Todas as autarquias
-						</DropdownMenu.Item>
-						<DropdownMenu.Separator />
-						{#each parishes as parish (parish.code)}
-							<DropdownMenu.Item
-								onclick={() => {
-									selectedParish = parish.code;
-									performSearch();
-								}}
-							>
-								{parish.name}
-							</DropdownMenu.Item>
-						{/each}
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
+				<SelectAutarchy {parishes} bind:selectedParish></SelectAutarchy>
 			</div>
 
 			<div>
@@ -168,62 +121,43 @@
 					class="block text-sm font-medium text-gray-700 mb-2"
 				>Tag</label
 				>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger
+				<Select.Root type="single" bind:value={selectedTag}>
+					<Select.Trigger
 						class={buttonVariants({
 							variant: 'outline',
 							class: 'justify-between',
 						})}
 					>
 						{getSelectedTagName()}
-						<svg
-							class="ml-2 h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 9l-7 7-7-7"
-							/>
-						</svg>
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content class="w-56">
-						<DropdownMenu.Item
-							onclick={() => {
-								selectedTag = '';
-								performSearch();
-							}}
+					</Select.Trigger>
+					<Select.Content class="w-64">
+						<Select.Item
+							value=""
 						>
 							Todas as tags
-						</DropdownMenu.Item>
-						<DropdownMenu.Separator />
+						</Select.Item>
+						<Select.Separator />
 						{#each tags as tag (tag.name)}
-							<DropdownMenu.Item
-								onclick={() => {
-									selectedTag = tag.name;
-									performSearch();
-								}}
+							<Select.Item
+								value={tag.name}
 							>
 								<span class="flex items-center gap-2">
 									<Tag tag={tag} />
 								</span>
-							</DropdownMenu.Item>
+							</Select.Item>
 						{/each}
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
+					</Select.Content>
+				</Select.Root>
 			</div>
+			{#if searchTerm || selectedParish || selectedTag}
+				<div class="mt-4 self-end">
+					<Button variant="outline" onclick={clearFilters}
+					>Limpar filtros</Button
+					>
+				</div>
+			{/if}
 		</div>
 
-		{#if searchTerm || selectedParish || selectedCategory || selectedTag}
-			<div class="mt-4">
-				<Button variant="outline" onclick={clearFilters}
-				>Limpar filtros</Button
-				>
-			</div>
-		{/if}
 	</div>
 
 	<!-- Initiatives Display -->
@@ -311,7 +245,7 @@
 <footer class="bg-gray-50 border-t mt-16">
 	<div class="container mx-auto px-4 py-8 text-center text-gray-600">
 		<p>
-			&copy; 2025 Portal do Autarca. Plataforma de transparência
+			&copy; 2025 {branding.siteName}. Plataforma de transparência
 			municipal.
 		</p>
 	</div>

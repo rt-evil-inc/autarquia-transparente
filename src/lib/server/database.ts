@@ -45,19 +45,29 @@ export async function seedDatabase() {
 
 		// Create default parishes
 		const parishData = [
-			{ name: 'Parque das Nações', code: 'parque-nacoes', description: 'Freguesia do Parque das Nações' },
-			{ name: 'Alvalade', code: 'alvalade', description: 'Freguesia de Alvalade' },
-			{ name: 'Santo António', code: 'santo-antonio', description: 'Freguesia de Santo António' },
-			{ name: 'Estrela', code: 'estrela', description: 'Freguesia da Estrela' },
-			{ name: 'Carnide', code: 'carnide', description: 'Freguesia de Carnide' },
+			{ name: 'Lumiar', code: 'lumiar', description: 'Freguesia do Lumiar' },
+			{ name: 'Penha de França', code: 'penha-franca', description: 'Freguesia de Penha de França' },
 		];
 
 		console.log('Creating parishes...');
 		for (const parish of parishData) {
 			console.log(`Inserting parish: ${parish.name}`);
-			await drizzleDb.insert(parishes).values(parish).onConflictDoNothing();
+			await drizzleDb.insert(parishes).values({ ...parish, type: 'parish' }).onConflictDoNothing();
 		}
 		console.log('Parishes created successfully');
+
+		const autarchyData = [
+			{ name: 'Câmara Municipal', code: 'camara-municipal', description: 'Autarquia da Câmara Municipal' },
+			{ name: 'Assembleia Municipal', code: 'assembleia-municipal', description: 'Autarquia da Assembleia Municipal' },
+		];
+
+		// Create default autarchies
+		console.log('Creating autarchies...');
+		for (const autarchy of autarchyData) {
+			console.log(`Inserting autarchy: ${autarchy.name}`);
+			await drizzleDb.insert(parishes).values({ ...autarchy, type: 'autarchy' }).onConflictDoNothing();
+		}
+		console.log('Autarchies created successfully');
 
 		// Create default tags
 		const tagData = [

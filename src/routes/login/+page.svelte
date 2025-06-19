@@ -4,6 +4,7 @@
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import branding from '$lib/config/branding';
 
 	let email = '';
 	let password = '';
@@ -53,13 +54,13 @@
 </script>
 
 <svelte:head>
-	<title>Login - Portal do Autarca</title>
+	<title>Login - {branding.siteName}</title>
 </svelte:head>
 
 <div class="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
 	<div class="max-w-md w-full space-y-8">
 		<div class="text-center">
-			<h1 class="text-3xl font-bold text-blue-600">Portal do Autarca</h1>
+			<h1 class="text-3xl font-bold text-blue-600">{branding.siteName}</h1>
 			<p class="mt-2 text-gray-600">Acesso ao painel de administração</p>
 		</div>
 

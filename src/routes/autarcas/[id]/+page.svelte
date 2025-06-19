@@ -5,6 +5,7 @@
 		CardHeader,
 		CardTitle,
 	} from '$lib/components/ui/card';
+	import branding from '$lib/config/branding.js';
 
 	let { data } = $props();
 	let autarca = $derived(data.autarca);
@@ -19,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>{autarca.name} - Portal do Autarca</title>
+	<title>{autarca.name} - {branding.siteName}</title>
 	<meta name="description" content="Perfil completo de {autarca.name}, {autarca.municipality}" />
 </svelte:head>
 

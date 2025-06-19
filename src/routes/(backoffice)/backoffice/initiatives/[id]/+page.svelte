@@ -8,4 +8,5 @@
 <EditInitiative
 	initiative={data.initiative}
 	tags={data.tags}
+	parishes={data.parishes}
 />

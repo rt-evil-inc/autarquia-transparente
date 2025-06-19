@@ -26,11 +26,7 @@ export interface InitiativeListData {
       notes?: string;
     }>;
   }>;
-  parishes: Array<{
-    id: number;
-    name: string;
-    code: string;
-  }>;
+  parishes: Parish[];
   tags: Array<{
     id: number;
     name: string;

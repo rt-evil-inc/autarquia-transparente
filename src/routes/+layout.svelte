@@ -94,6 +94,14 @@
 												</div>
 											</NavigationMenu.Link>
 										</li>
+										<li>
+											<NavigationMenu.Link href="/backoffice/initiatives/bulk">
+												<div class="font-medium">Importar</div>
+												<div class="text-muted-foreground text-sm">
+													Importar iniciativas
+												</div>
+											</NavigationMenu.Link>
+										</li>
 									</ul>
 								</NavigationMenu.Content>
 							</NavigationMenu.Item>

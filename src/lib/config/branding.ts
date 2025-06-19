@@ -1,5 +1,5 @@
 export default {
-	'siteName': 'Portal do Autarca',
+	'siteName': 'Autarquia Transparente',
 	'pages': {
 		'home': {
 			'title': 'Todas as iniciativas',

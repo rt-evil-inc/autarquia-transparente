@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import branding from '$lib/config/branding.js';
 
 	let { data } = $props();
 
@@ -42,7 +43,7 @@
 </script>
 
 <svelte:head>
-	<title>Painel da Freguesia - Portal do Autarca</title>
+	<title>Painel da Freguesia - {branding.siteName}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">

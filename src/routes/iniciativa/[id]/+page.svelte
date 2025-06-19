@@ -124,7 +124,7 @@
 						<div>
 							<h3 class="text-lg font-semibold mb-2">Descrição Detalhada</h3>
 							<div class="prose prose-gray max-w-none">
-								{#each initiative.content.split('\n') as paragraph (paragraph)}
+								{#each initiative.content.split('\n').filter(p => p.trim() != '') as paragraph (paragraph)}
 									{#if paragraph.trim()}
 										<p class="mb-4">{paragraph}</p>
 									{/if}

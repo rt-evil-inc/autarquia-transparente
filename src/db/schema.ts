@@ -5,6 +5,7 @@ export const parishes = sqliteTable('parishes', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	name: text('name').unique().notNull(),
 	code: text('code').unique().notNull(),
+	type: text('type', { enum: ['parish', 'autarchy'] }).notNull(),
 	description: text('description'),
 	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });

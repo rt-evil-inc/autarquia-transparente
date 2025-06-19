@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import type { Tag } from '$lib/server/database';
+	import type { Parish, Tag } from '$lib/server/database';
+	import { isConfig } from 'drizzle-orm';
 	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
+	import SelectAutarchy from '../SelectAutarchy.svelte';
 	import DocumentManager from './DocumentManager.svelte';
 	import InitiativeBasicInfo from './InitiativeBasicInfo.svelte';
 	import InitiativeStatusInfo from './InitiativeStatusInfo.svelte';
@@ -9,12 +11,15 @@
 	import MeetingInfo from './MeetingInfo.svelte';
 	import TagManager from './TagManager.svelte';
 	import VoteEditor from './VoteEditor.svelte';
+	import branding from '$lib/config/branding';
 
-	let { initiative, tags }:{initiative?: FullInitiativeResponse, tags: Tag[] } = $props();
+	let { initiative, tags, parishes, defaultParish }:{initiative?: FullInitiativeResponse, tags: Tag[], parishes: Parish[], defaultParish?: string } = $props();
 
 	// Check if we're in edit mode (data.initiative exists)
 	const isEditMode = !!initiative?.id;
 	const initiativeId = initiative?.id ?? null;
+
+	let selectedParish = $state(defaultParish ?? initiative?.parish_code ?? '');
 
 	let title = $state(initiative?.title ?? '');
 	let description = $state(initiative?.description ?? '');
@@ -126,7 +131,7 @@
 </script>
 
 <svelte:head>
-	<title>{initiative?.title ? `Editar: ${initiative.title}` : 'Nova Iniciativa'} - Portal do Autarca</title>
+	<title>{initiative?.title ? `Editar: ${initiative.title}` : 'Nova Iniciativa'} - {branding.siteName}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50">
@@ -134,11 +139,14 @@
 	<main class="mx-auto max-w-4xl py-6 sm:px-6 lg:px-8">
 		<div class="px-4 py-6 sm:px-0">
 			<Card>
-				<CardHeader>
-					<CardTitle>{isEditMode ? 'Editar Iniciativa' : 'Criar Nova Iniciativa'}</CardTitle>
-					<CardDescription>
-						{isEditMode ? 'Edite os campos abaixo para atualizar a sua iniciativa' : 'Preencha os campos abaixo para criar uma nova iniciativa para a sua freguesia'}
-					</CardDescription>
+				<CardHeader class="flex justify-between items-center">
+					<div>
+						<CardTitle>{isEditMode ? 'Editar Iniciativa' : 'Criar Nova Iniciativa'}</CardTitle>
+						<CardDescription>
+							{isEditMode ? 'Edite os campos abaixo para atualizar a sua iniciativa' : 'Preencha os campos abaixo para criar uma nova iniciativa para a sua freguesia'}
+						</CardDescription>
+					</div>
+					<SelectAutarchy {parishes} bind:selectedParish allEnabled={false}/>
 				</CardHeader>
 				<CardContent class="space-y-6">
 					{#if error}
