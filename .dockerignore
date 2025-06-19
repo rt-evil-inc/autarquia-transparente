@@ -1,0 +1,45 @@
+# Docker ignore file for portal-autarca
+node_modules
+npm-debug.log
+Dockerfile*
+docker-compose*
+.dockerignore
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.production.local
+.env.development.local
+.vscode
+.DS_Store
+
+# Build artifacts
+build/
+.svelte-kit/
+
+# Development files
+.eslintrc.js
+.prettierrc
+
+# Database files (these should be mounted as volumes)
+*.db
+*.db-journal
+
+# Logs
+logs
+*.log
+
+# Development dependencies cache
+.npm
+.bun
+
+# Temporary files
+tmp/
+temp/
+
+#db 
+*.db
+
+data
+static/uploads

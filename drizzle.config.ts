@@ -1,10 +1,10 @@
 import { defineConfig } from 'drizzle-kit';
-
-export default defineConfig({
+export const config = {
 	out: './drizzle',
 	schema: './src/db/schema.ts',
 	dialect: 'sqlite',
 	dbCredentials: {
-		url: './portal-autarca.db',
+		url: './data/portal-autarca.db',
 	},
-});
+} as const;
+export default defineConfig(config);

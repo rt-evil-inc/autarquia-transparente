@@ -19,8 +19,8 @@ import {
 	type Vote,
 } from '../../db/schema.js';
 
-// Initialize database with strict mode
-export const db = new Database('portal-autarca.db');
+// Initialize database
+export const db = new Database('data/portal-autarca.db');
 export const drizzleDb = drizzle(db);
 
 // Enable foreign keys

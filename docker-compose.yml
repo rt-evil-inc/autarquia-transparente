@@ -1,0 +1,23 @@
+services:
+  portal-autarca:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      # Database path - mounted volume
+      - DATABASE_PATH=/app/data/portal-autarca.db
+    volumes:
+      # Mount data directory for SQLite database and uploads
+      - ./data:/app/data
+      # Mount uploads directory
+      - ./data/uploads:/app/static/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"] 
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
