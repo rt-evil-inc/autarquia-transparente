@@ -122,8 +122,7 @@
 			}
 
 			// Build content from description and themes
-			let content = descricao;
-			if (situacaoAtual) content += `Situação Atual: ${situacaoAtual}\n\n`;
+			let content = `Situação Atual: ${situacaoAtual}\n\n`;
 			let tags = temas.split(',').map(tag => tag.trim()).filter(tag => tag);
 			tags.forEach(tag => {
 				tagsSet.add(tag);
@@ -132,8 +131,8 @@
 			return {
 				// Basic initiative data
 				title: nomeProposta || `Proposta ${proposalNumber || index + 1}`,
-				description: descricao || nomeProposta || '',
-				content: content.trim() || nomeProposta || '',
+				description: descricao || '',
+				content: content.trim() || '',
 				status: resultado?.toLowerCase().includes('aprovad') ? 'approved' : 'rejected',
 
 				// Meeting data
