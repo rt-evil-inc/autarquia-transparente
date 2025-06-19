@@ -71,7 +71,7 @@
 						// Toggle quote state
 						inQuotes = !inQuotes;
 					}
-				} else if (char === ',' && !inQuotes) {
+				} else if (char === ';' && !inQuotes) {
 					// Field separator
 					currentRow.push(currentField.trim());
 					currentField = '';
