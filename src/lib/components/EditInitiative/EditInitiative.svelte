@@ -1,14 +1,14 @@
 <script lang="ts">
+	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import type { Tag } from '$lib/server/database';
 	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
-	import VoteEditor from './VoteEditor.svelte';
-	import InitiativeBasicInfo from './InitiativeBasicInfo.svelte';
-	import TagManager from './TagManager.svelte';
 	import DocumentManager from './DocumentManager.svelte';
+	import InitiativeBasicInfo from './InitiativeBasicInfo.svelte';
 	import InitiativeStatusInfo from './InitiativeStatusInfo.svelte';
 	import InitiativeActions from './InitiativeSubmitSave.svelte';
 	import MeetingInfo from './MeetingInfo.svelte';
-	import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import TagManager from './TagManager.svelte';
+	import VoteEditor from './VoteEditor.svelte';
 
 	let { initiative, tags }:{initiative?: FullInitiativeResponse, tags: Tag[] } = $props();
 
@@ -19,7 +19,6 @@
 	let title = $state(initiative?.title ?? '');
 	let description = $state(initiative?.description ?? '');
 	let content = $state(initiative?.content ?? '');
-	let category = $state(initiative?.category ?? '');
 	let selectedTags: number[] = $state(initiative?.tags ?
 		initiative.tags.map(t => t.id) : []);
 	let votes = $state(initiative?.votes ? [...initiative.votes] : []);
@@ -37,24 +36,6 @@
 	let meetingNotes = $state(initiative?.meeting_notes ?? '');
 	let proposalDocument: File | null = $state(null);
 	let proposalDocumentInput: FileList | undefined = $state(undefined);
-
-	const categories = [
-		{ value: 'financas', label: 'Finanças' },
-		{ value: 'transparencia', label: 'Transparência' },
-		{ value: 'mobilidade', label: 'Mobilidade' },
-		{ value: 'seguranca', label: 'Segurança' },
-		{ value: 'habitacao', label: 'Habitação' },
-		{ value: 'patrimonio', label: 'Património' },
-		{ value: 'ambiente', label: 'Ambiente' },
-		{ value: 'educacao', label: 'Educação' },
-		{ value: 'saude', label: 'Saúde' },
-		{ value: 'cultura', label: 'Cultura' },
-	];
-
-	// Get category label for saving
-	const selectedCategoryLabel = $derived(
-		categories.find(c => c.value === category)?.label || null,
-	);
 
 	async function saveInitiative(status: 'draft' | 'submitted' | 'approved' | 'rejected') {
 		if (!title.trim()) {
@@ -78,7 +59,6 @@
 				formData.append('title', title.trim());
 				formData.append('description', description.trim());
 				formData.append('content', content.trim());
-				formData.append('category', selectedCategoryLabel || '');
 				formData.append('tags', JSON.stringify(selectedTags));
 				formData.append('status', status);
 				formData.append('votes', JSON.stringify(votes));
@@ -107,7 +87,6 @@
 						title: title.trim(),
 						description: description.trim(),
 						content: content.trim(),
-						category: selectedCategoryLabel || null,
 						tags: selectedTags,
 						status,
 						votes: votes,
@@ -169,7 +148,7 @@
 					{/if}
 
 					<!-- Basic Information -->
-					<InitiativeBasicInfo bind:title bind:description bind:content bind:category />
+					<InitiativeBasicInfo bind:title bind:description bind:content />
 
 					<!-- Tags -->
 					<TagManager bind:tags bind:selectedTags bind:error />

@@ -26,15 +26,6 @@
 	let selectedCategory = $derived(data.filters.selectedCategory);
 	let selectedTag = $derived(data.filters.selectedTag);
 
-	const categories = [
-		'Finanças',
-		'Transparência',
-		'Mobilidade',
-		'Segurança',
-		'Habitação',
-		'Património',
-	];
-
 	function performSearch() {
 		const params = new URLSearchParams;
 		if (searchTerm.trim()) params.append('search', searchTerm.trim());
@@ -71,13 +62,9 @@
 	}
 
 	function getSelectedParishName(): string {
-		if (!selectedParish) return 'Todas as freguesias';
+		if (!selectedParish) return 'Todas as autarquias';
 		const parish = parishes.find(p => p.code === selectedParish);
-		return parish?.name || 'Todas as freguesias';
-	}
-
-	function getSelectedCategoryName(): string {
-		return selectedCategory || 'Todas as categorias';
+		return parish?.name || 'Todas as autarquias';
 	}
 
 	function getSelectedTagName(): string {
@@ -126,7 +113,7 @@
 				<label
 					for="parish-dropdown"
 					class="block text-sm font-medium text-gray-700 mb-2"
-				>Freguesia</label
+				>Autarquia</label
 				>
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger
@@ -158,7 +145,7 @@
 								performSearch();
 							}}
 						>
-							Todas as freguesias
+							Todas as autarquias
 						</DropdownMenu.Item>
 						<DropdownMenu.Separator />
 						{#each parishes as parish (parish.code)}
@@ -169,56 +156,6 @@
 								}}
 							>
 								{parish.name}
-							</DropdownMenu.Item>
-						{/each}
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
-			</div>
-
-			<div>
-				<label
-					for="category-dropdown"
-					class="block text-sm font-medium text-gray-700 mb-2"
-				>Categoria</label
-				>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger class={buttonVariants({
-						variant: 'outline',
-						class: 'w-full justify-between',
-					})}>
-						{getSelectedCategoryName()}
-						<svg
-							class="ml-2 h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M19 9l-7 7-7-7"
-							/>
-						</svg>
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content class="w-56">
-						<DropdownMenu.Item
-							onclick={() => {
-								selectedCategory = '';
-								performSearch();
-							}}
-						>
-							Todas as categorias
-						</DropdownMenu.Item>
-						<DropdownMenu.Separator />
-						{#each categories as category (category)}
-							<DropdownMenu.Item
-								onclick={() => {
-									selectedCategory = category;
-									performSearch();
-								}}
-							>
-								{category}
 							</DropdownMenu.Item>
 						{/each}
 					</DropdownMenu.Content>
@@ -318,13 +255,6 @@
 										{initiative.parish_name}
 									</CardDescription>
 								</div>
-								{#if initiative.category}
-									<span
-										class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
-									>
-										{initiative.category}
-									</span>
-								{/if}
 							</div>
 						</CardHeader>
 

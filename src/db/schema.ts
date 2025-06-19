@@ -33,7 +33,6 @@ export const initiatives = sqliteTable('initiatives', {
 	description: text('description'),
 	content: text('content'),
 	parish_id: integer('parish_id').notNull().references(() => parishes.id),
-	category: text('category'),
 	status: text('status', { enum: ['draft', 'submitted', 'approved', 'rejected'] }).notNull().default('draft'),
 	submission_date: text('submission_date'),
 	vote_date: text('vote_date'),

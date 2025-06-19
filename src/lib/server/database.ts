@@ -1,23 +1,24 @@
-import { Database } from 'bun:sqlite';
 import bcrypt from 'bcrypt';
-import fs from 'fs';
+import { Database } from 'bun:sqlite';
+import { and, desc, eq, like, or } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/bun-sqlite';
-import { eq, and, like, or, desc } from 'drizzle-orm';
+import fs from 'fs';
 import {
-	parishes,
-	users,
-	tags,
-	initiatives,
 	initiative_documents,
 	initiative_tags,
+	initiatives,
+	parishes,
+	tags,
+	users,
 	votes,
-	// Import types from schema
-	type User,
+	type InitiativeDocument,
+	type NewInitiative,
 	type Parish,
 	type Tag,
-	type InitiativeDocument,
+	// Import types from schema
+	type User,
 	type Vote,
-} from '../../db/schema.js';
+} from '../../db/schema';
 
 // Initialize database
 export const db = new Database('data/portal-autarca.db');
@@ -27,8 +28,8 @@ export const drizzleDb = drizzle(db);
 db.exec('PRAGMA foreign_keys = ON');
 
 // Re-export types for backward compatibility
-export type { User, Parish, Tag, InitiativeDocument, Vote };
-export type { Initiative, InitiativeWithParish, FullInitiative } from '../../db/schema.js';
+export type { FullInitiative, Initiative, InitiativeWithParish } from '../../db/schema.js';
+export type { InitiativeDocument, Parish, Tag, User, Vote };
 
 // Create tables
 export function initializeDatabase() {
@@ -156,7 +157,6 @@ export const queries = {	// User functions
 			description: initiatives.description,
 			content: initiatives.content,
 			parish_id: initiatives.parish_id,
-			category: initiatives.category,
 			status: initiatives.status,
 			submission_date: initiatives.submission_date,
 			vote_date: initiatives.vote_date,
@@ -180,7 +180,6 @@ export const queries = {	// User functions
 			description: initiatives.description,
 			content: initiatives.content,
 			parish_id: initiatives.parish_id,
-			category: initiatives.category,
 			status: initiatives.status,
 			submission_date: initiatives.submission_date,
 			vote_date: initiatives.vote_date,
@@ -204,40 +203,23 @@ export const queries = {	// User functions
 			.all();
 	},
 
-	createInitiative: (title: string, description: string, content: string, parish_id: number, category: string, created_by: number) => {
+	createInitiative: (title: string, description: string, content: string, parish_id: number, created_by: number) => {
 		const result = drizzleDb.insert(initiatives).values({
 			title,
 			description,
 			content,
 			parish_id,
-			category,
 			created_by,
 		}).returning({ id: initiatives.id }).get();
 		return result.id;
 	},
 
-	createInitiativeFull: (data: {
-		title: string,
-		description: string,
-		content: string,
-		parish_id: number,
-		category: string,
-		created_by: number,
-		status: string,
-		submission_date: string | null,
-		proposal_number?: string | null,
-		proposal_type?: string | null,
-		meeting_number?: number | null,
-		meeting_date?: string | null,
-		meeting_type?: string | null,
-		meeting_notes?: string | null,
-	}) => {
+	createInitiativeFull: (data: NewInitiative) => {
 		const result = drizzleDb.insert(initiatives).values({
 			title: data.title,
 			description: data.description,
 			content: data.content,
 			parish_id: data.parish_id,
-			category: data.category,
 			created_by: data.created_by,
 			status: data.status as 'draft' | 'submitted' | 'approved' | 'rejected',
 			submission_date: data.submission_date,
@@ -259,7 +241,6 @@ export const queries = {	// User functions
 			description: initiatives.description,
 			content: initiatives.content,
 			parish_id: initiatives.parish_id,
-			category: initiatives.category,
 			status: initiatives.status,
 			submission_date: initiatives.submission_date,
 			vote_date: initiatives.vote_date,
@@ -308,14 +289,13 @@ export const queries = {	// User functions
 	},
 
 	// Search functions
-	searchInitiatives: (search: string | null, parish_code: string | null, category: string | null) => {
+	searchInitiatives: (search: string | null, parish_code: string | null) => {
 		const baseQuery = drizzleDb.select({
 			id: initiatives.id,
 			title: initiatives.title,
 			description: initiatives.description,
 			content: initiatives.content,
 			parish_id: initiatives.parish_id,
-			category: initiatives.category,
 			status: initiatives.status,
 			submission_date: initiatives.submission_date,
 			vote_date: initiatives.vote_date,
@@ -345,14 +325,10 @@ export const queries = {	// User functions
 			conditions.push(eq(parishes.code, parish_code));
 		}
 
-		if (category) {
-			conditions.push(eq(initiatives.category, category));
-		}
-
 		return baseQuery.where(and(...conditions)).orderBy(desc(initiatives.created_at)).all();
 	},
 
-	searchInitiativesWithTag: (search: string | null, tag_name: string, parish_code: string | null, category: string | null) => {
+	searchInitiativesWithTag: (search: string | null, tag_name: string, parish_code: string | null) => {
 		const conditions = [eq(initiatives.status, 'approved'), eq(tags.name, tag_name)];
 
 		if (search) {
@@ -369,17 +345,12 @@ export const queries = {	// User functions
 			conditions.push(eq(parishes.code, parish_code));
 		}
 
-		if (category) {
-			conditions.push(eq(initiatives.category, category));
-		}
-
 		return drizzleDb.selectDistinct({
 			id: initiatives.id,
 			title: initiatives.title,
 			description: initiatives.description,
 			content: initiatives.content,
 			parish_id: initiatives.parish_id,
-			category: initiatives.category,
 			status: initiatives.status,
 			submission_date: initiatives.submission_date,
 			vote_date: initiatives.vote_date,
@@ -443,13 +414,12 @@ export const queries = {	// User functions
 			.where(eq(initiative_tags.initiative_id, initiative_id)).run();
 	},
 
-	updateInitiative: (id: number, title: string, description: string, content: string, category: string): void => {
+	updateInitiative: (id: number, title: string, description: string, content: string): void => {
 		drizzleDb.update(initiatives)
 			.set({
 				title,
 				description,
 				content,
-				category,
 				updated_at: (new Date).toISOString(),
 			})
 			.where(eq(initiatives.id, id)).run();
@@ -468,7 +438,6 @@ export const queries = {	// User functions
 		title: string,
 		description: string,
 		content: string,
-		category: string,
 		status: string,
 		submission_date: string | null,
 		proposal_number?: string | null,
@@ -482,7 +451,6 @@ export const queries = {	// User functions
 			title: data.title,
 			description: data.description,
 			content: data.content,
-			category: data.category,
 			status: data.status as 'draft' | 'submitted' | 'approved' | 'rejected',
 			updated_at: (new Date).toISOString(),
 			// Meeting fields

@@ -14,13 +14,12 @@ export const GET: RequestHandler = async ({ url }) => {
 	const searchParams = url.searchParams;
 	const search = searchParams.get('search');
 	const parish = searchParams.get('parish');
-	const category = searchParams.get('category');
 	const tag = searchParams.get('tag');
 
 	// Prepare search parameters
 	const searchTerm = search ? `%${search}%` : null;
 
-	const initiatives = tag ? queries.searchInitiativesWithTag(searchTerm, tag, parish, category) : queries.searchInitiatives(searchTerm, parish, category);
+	const initiatives = tag ? queries.searchInitiativesWithTag(searchTerm, tag, parish) : queries.searchInitiatives(searchTerm, parish);
 
 	// Get tags and votes for each initiative
 	const initiativesWithTagsAndVotes = initiatives.map(initiative => ({

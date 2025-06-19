@@ -15,6 +15,13 @@
       "when": 1750257782592,
       "tag": "0001_smart_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1750329430856,
+      "tag": "0002_sparkling_menace",
+      "breakpoints": true
     }
   ]
 }

@@ -85,7 +85,6 @@
 								<div class="flex items-center justify-between p-4 border rounded-lg">
 									<div class="flex-1">
 										<h4 class="font-medium text-gray-900">{initiative.title}</h4>
-										<p class="text-sm text-gray-600">{initiative.category || 'Sem categoria'}</p>
 										<p class="text-xs text-gray-500">Criado em {formatDate(initiative.created_at)}</p>
 									</div>
 									<div class="flex items-center space-x-2">

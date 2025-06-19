@@ -89,7 +89,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	} else {
 		// Handle JSON data
 		const data = await request.json();
-		({ title, description, content, category, tags, status, votes, proposalNumber, proposalType, meetingNumber, meetingDate, meetingType, meetingNotes } = data);
+		({ title, description, content, tags, status, votes, proposalNumber, proposalType, meetingNumber, meetingDate, meetingType, meetingNotes } = data);
 	}
 
 	if (!title) {
@@ -120,7 +120,6 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 			title,
 			description,
 			content,
-			category,
 			status: initiativeStatus,
 			submission_date: submissionDate,
 			proposal_number: proposalNumber || null,

@@ -79,7 +79,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		description,
 		content,
 		parish_id: targetParishId,
-		category: category || null,
 		created_by: locals.user.id,
 		status: initiativeStatus,
 		submission_date: submissionDate,

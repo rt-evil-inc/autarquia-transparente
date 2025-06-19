@@ -1,0 +1,1 @@
+ALTER TABLE `initiatives` DROP COLUMN `category`;

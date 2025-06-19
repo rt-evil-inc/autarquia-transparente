@@ -86,13 +86,6 @@
 							</CardDescription>
 						</div>
 						<div class="flex items-center gap-2">
-							{#if initiative.category}
-								<span
-									class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
-								>
-									{initiative.category}
-								</span>
-							{/if}
 							{#if data.user}
 								<Button variant="outline" size="sm" href="/backoffice/initiatives/{initiative.id}">
 									Editar
