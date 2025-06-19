@@ -584,7 +584,7 @@
 							<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div>
 									<Label for="parish">Freguesia *</Label>
-									<SelectAutarchy parishes={data.parishes} bind:selectedParish={selectedParish} />
+									<SelectAutarchy parishes={data.parishes} bind:selectedParish={selectedParish} allEnabled={false} />
 								</div>
 
 								<div>
