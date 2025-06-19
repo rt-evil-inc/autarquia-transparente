@@ -18,7 +18,7 @@
 
 <!-- Actions -->
 <div class="flex justify-between pt-6">
-	<Button variant="outline" onclick={() => goto(isEditMode ? '/backoffice/initiatives' : '/backoffice/parish')}>
+	<Button variant="outline" onclick={() => goto(isEditMode ? '/backoffice' : '/backoffice')}>
 		Cancelar
 	</Button>
 

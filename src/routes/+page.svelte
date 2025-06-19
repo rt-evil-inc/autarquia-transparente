@@ -44,11 +44,6 @@
 
 	function handleSearch(event: Event) {
 		event.preventDefault();
-		console.log('Performing search with params:', {
-			searchTerm,
-			selectedParish,
-			selectedTag,
-		});
 		performSearch(searchTerm, selectedParish, selectedTag);
 	}
 
