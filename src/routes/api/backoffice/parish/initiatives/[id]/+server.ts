@@ -4,6 +4,7 @@ import { queries } from '$lib/server/database';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { uploadsDir } from '$lib/config';
 
 // Type definitions
 export interface Tag {
@@ -159,8 +160,6 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 
 	// Handle file upload if provided
 	if (file && file.size > 0) {
-		const uploadsDir = path.join(process.cwd(), 'static', 'uploads');
-
 		// Ensure uploads directory exists
 		if (!existsSync(uploadsDir)) {
 			await mkdir(uploadsDir, { recursive: true });
@@ -189,8 +188,6 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 
 	// Handle proposal document upload if provided
 	if (proposalFile && proposalFile.size > 0) {
-		const uploadsDir = path.join(process.cwd(), 'static', 'uploads');
-
 		// Ensure uploads directory exists
 		if (!existsSync(uploadsDir)) {
 			await mkdir(uploadsDir, { recursive: true });

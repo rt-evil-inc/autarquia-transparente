@@ -31,7 +31,7 @@
 								</p>
 							</div>
 							<a
-								href="/uploads/{doc.filename}"
+								href="/api/uploads/{doc.filename}"
 								download={doc.original_filename}
 								class="flex items-center justify-center w-8 h-8 rounded-md hover:bg-gray-200 transition-colors"
 								title="Download PDF"
@@ -40,7 +40,7 @@
 							</a>
 						</div>
 						<iframe
-							src="/uploads/{doc.filename}"
+							src="/api/uploads/{doc.filename}"
 							class="w-full h-[500px] lg:h-[calc(100vh-120px)]"
 							title="Documento da Proposta"
 						>

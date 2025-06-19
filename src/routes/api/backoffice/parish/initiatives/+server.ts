@@ -4,6 +4,7 @@ import { queries, type Initiative } from '$lib/server/database';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
+import { uploadsDir } from '$lib/config';
 
 export type InitiativeWithTags = Initiative & {
   tags: { id: number; name: string }[];
@@ -99,8 +100,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	// Handle file upload if provided
 	if (file && file.size > 0) {
-		const uploadsDir = path.join(process.cwd(), 'static', 'uploads');
-
 		// Ensure uploads directory exists
 		if (!existsSync(uploadsDir)) {
 			await mkdir(uploadsDir, { recursive: true });
@@ -129,8 +128,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	// Handle proposal document upload if provided (already extracted from formData above)
 	if (proposalFile && proposalFile.size > 0) {
-		const uploadsDir = path.join(process.cwd(), 'static', 'uploads');
-
 		// Ensure uploads directory exists
 		if (!existsSync(uploadsDir)) {
 			await mkdir(uploadsDir, { recursive: true });

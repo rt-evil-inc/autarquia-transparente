@@ -64,7 +64,7 @@
 						<Button
 							variant="outline"
 							size="sm"
-							onclick={() => window.open(`/uploads/${document.filename}`, '_blank')}
+							onclick={() => window.open(`/api/uploads/${document.filename}`, '_blank')}
 						>
 							Ver
 						</Button>

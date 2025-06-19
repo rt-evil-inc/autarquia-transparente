@@ -50,7 +50,7 @@
 							</div>
 						</div>
 					</div>
-					<a href="/uploads/{doc.filename}" target="_blank">
+					<a href="/api/uploads/{doc.filename}" target="_blank">
 						<Button variant="outline" size="sm">Descarregar</Button>
 					</a>
 				</div>
