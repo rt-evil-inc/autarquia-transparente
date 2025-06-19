@@ -22,6 +22,8 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-data
 *.db
 static/uploads
+
+!data/.gitignore
+!static/uploads/.gitkeep

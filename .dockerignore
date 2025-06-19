@@ -41,5 +41,5 @@ temp/
 #db 
 *.db
 
-data
+data/*.db
 static/uploads
