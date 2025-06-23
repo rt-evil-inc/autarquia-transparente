@@ -1,6 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { queries, type Tag } from '$lib/server/database';
+import { randomColor } from '$lib/colors';
 
 // Type definitions
 export type TagResponse = Tag;
@@ -30,7 +31,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const tagName = name.trim();
-		const tagColor = color || '#3B82F6'; // Default blue color
+		const tagColor = color || randomColor().name; // Default blue color
 
 		// Check if tag already exists
 		const existing = queries.getTagByName(tagName);

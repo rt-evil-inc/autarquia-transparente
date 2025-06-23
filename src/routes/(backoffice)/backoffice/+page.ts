@@ -1,15 +1,17 @@
-import type { InitiativeWithTags } from '../../api/backoffice/initiatives/+server';
-import type { Parish } from '$lib/server/database';
-import { error, redirect } from '@sveltejs/kit';
 import type { User } from '$lib/auth';
+import { error, redirect } from '@sveltejs/kit';
+import type { InitiativesResponse } from '../../api/initiatives/+server';
 
 export interface ParishDashboardData {
-	initiatives: InitiativeWithTags[];
-	parishInfo: Parish | null;
+	initiatives: InitiativesResponse['initiatives'];
+	totalCount: number;
+	totalPages: number;
+	currentPage: number;
+	perPage: number;
 	user: User;
 }
 
-export const load = async ({ fetch, parent }) => {
+export const load = async ({ fetch, parent, url, depends }) => {
 	try {
 		// Get parent data to check authentication
 		const { user } = await parent();
@@ -19,8 +21,15 @@ export const load = async ({ fetch, parent }) => {
 			throw redirect(302, '/login');
 		}
 
-		// Fetch initiatives data
-		const initiativesResponse = await fetch('/api/initiatives');
+		// Get pagination parameters from URL
+		const page = url.searchParams.get('page');
+		const searchParams = new URLSearchParams;
+		if (page) searchParams.append('page', page);
+
+		// Fetch initiatives data with pagination
+		const initiativesUrl = `/api/initiatives${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
+		depends('app:initiatives'); // Ensure this is cached in the app cache
+		const initiativesResponse = await fetch(initiativesUrl);
 
 		if (!initiativesResponse.ok) {
 			if (initiativesResponse.status === 401) {
@@ -29,24 +38,14 @@ export const load = async ({ fetch, parent }) => {
 			throw error(initiativesResponse.status, `Failed to load initiatives: ${initiativesResponse.statusText}`);
 		}
 
-		const initiatives: InitiativeWithTags[] = await initiativesResponse.json();
-
-		// Fetch parish info if user has parish_id
-		let parishInfo: Parish | null = null;
-		if (user.parish_id) {
-			const parishResponse = await fetch('/api/parishes');
-
-			if (parishResponse.ok) {
-				const parishes: Parish[] = await parishResponse.json();
-				parishInfo = parishes.find((p: Parish) => p.id === user.parish_id) || null;
-			}
-			// Note: We don't throw an error if parish info fails to load
-			// as the dashboard should still work without it
-		}
+		const initiatives: InitiativesResponse = await initiativesResponse.json();
 
 		return {
-			initiatives,
-			parishInfo,
+			initiatives: initiatives.initiatives,
+			totalCount: initiatives.totalCount,
+			totalPages: initiatives.totalPages,
+			currentPage: initiatives.currentPage,
+			perPage: initiatives.perPage,
 			user,
 		} satisfies ParishDashboardData;
 	} catch (err) {

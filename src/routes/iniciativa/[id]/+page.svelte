@@ -71,15 +71,17 @@
 			<!-- Main Initiative Card -->
 			<Card>
 				<CardHeader>
-					<div class="flex items-start justify-between">
+					<div class="flex items-start justify-between gap-3">
 						<div class="flex-1">
 							<div class="flex items-center gap-3 mb-2">
-								<CardTitle class="text-2xl">{initiative.title}</CardTitle>
-								{#if votingResult && initiative.votes && initiative.votes.length > 0}
-									<span class="px-3 py-1 rounded-full text-sm font-medium {votingResult.className}">
-										{votingResult.label}
-									</span>
-								{/if}
+								<CardTitle class="text-2xl">{initiative.title}
+
+									{#if votingResult && initiative.votes && initiative.votes.length > 0}
+										<span class="px-3 py-1 rounded-full text-sm font-medium text-nowrap {votingResult.className}">
+											{votingResult.label}
+										</span>
+									{/if}
+								</CardTitle>
 							</div>
 							<CardDescription class="text-lg">
 								{initiative.parish_name}
@@ -134,28 +136,18 @@
 					{/if}
 
 					<!-- Meta Information -->
-					<div class="border-t pt-4">
-						<div
-							class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600"
-						>
-							<div>
-								<span class="font-medium">Data de criação:</span>
-								{formatDate(initiative.created_at)}
-							</div>
-							{#if initiative.submission_date}
-								<div>
-									<span class="font-medium">Data de submissão:</span>
-									{formatDate(initiative.submission_date)}
-								</div>
-							{/if}
-							{#if initiative.vote_date}
+					{#if initiative.vote_date}
+						<div class="border-t pt-4">
+							<div
+								class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600"
+							>
 								<div>
 									<span class="font-medium">Data da votação:</span>
 									{formatDate(initiative.vote_date)}
 								</div>
-							{/if}
+							</div>
 						</div>
-					</div>
+					{/if}
 				</CardContent>
 			</Card>
 

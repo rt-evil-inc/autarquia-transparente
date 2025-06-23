@@ -25,7 +25,7 @@
 	let fileInput: FileList | undefined = $state(undefined);
 	let selectedFile: File | null = $state(null);
 	let csvContent = $state('');
-	let parsedData: InitiativeCreateData[] = $state([]);
+	let parsedData: Omit<InitiativeCreateData, 'parish_id'>[] = $state([]);
 	let isProcessing = $state(false);
 	let error = $state('');
 	let success = $state('');
@@ -34,22 +34,25 @@
 	// Preview state
 	let showPreview = $state(false);
 	let selectedParish = $state('');
+	let selectedParishId = $derived(data.parishes.find(p => p.code === selectedParish)?.id || 0);
 	let defaultMeetingType = $state<'public'|'private'|'extraordinary'>('private');
 	let defaultProposalType = $state<'proposal'|'amendment'>('proposal');
 
-	async function convertCSVToInitiatives(csvData: string[][]): Promise<InitiativeCreateData[]> {
-		if (csvData.length === 0) return [];
+	let extractNumberRegex = /(\d+)/;
+
+	function convertCSVToInitiatives(csvData: string[][]): {initiatives: Omit<InitiativeCreateData, 'parish_id'>[], tags: string[]} {
+		if (csvData.length === 0) return { initiatives: [], tags: [] };
 
 		// Expected headers: Nº da Reunião (votação),Tipo de Reunião (votação),Data da Reunião (votação),Media,Tipo de Proposta,Nº,Nome da proposta,Descrição,Temas,Resultado,Situação Atual,DOC,PDF,Boletim Municipal,Notas
 		const dataRows = csvData.slice(1);
 		const tagsSet = new Set<string>;
 
-		let initiatives = await Promise.all(dataRows.map(async (row, index) => {
+		const initiatives = dataRows.map((row, index) => {
 			const [
 				numeroReuniao,
 				tipoReuniao,
 				dataReuniao,
-				media,
+				/* media */,
 				tipoProposta,
 				numeroProposta,
 				nomeProposta,
@@ -57,9 +60,9 @@
 				temas,
 				resultado,
 				situacaoAtual,
-				doc,
-				pdf,
-				boletimMunicipal,
+				/* doc */,
+				/* pdf */,
+				/* boletimMunicipal */,
 				notas,
 			] = row;
 
@@ -84,9 +87,11 @@
 					console.warn('Could not parse date:', dataReuniao);
 				}
 			}
+			// Extract meeting number
+			let meetingNumber = parseInt(extractNumberRegex.exec(numeroReuniao)?.[0] || '0');
 
 			// Extract proposal number
-			let proposalNumber = numeroProposta || numeroReuniao || '';
+			let proposalNumber = numeroProposta || '';
 
 			// Determine proposal type
 			let proposalType = defaultProposalType;
@@ -133,12 +138,13 @@
 				title: nomeProposta || `Proposta ${proposalNumber || index + 1}`,
 				description: descricao || '',
 				content: content.trim() || '',
-				status: resultado?.toLowerCase().includes('aprovad') ? 'approved' : 'rejected',
+				status: (resultado?.toLowerCase().includes('aprovad') ? 'approved' : 'rejected') as 'draft' | 'submitted' | 'approved' | 'rejected',
 
 				// Meeting data
 				proposal_number: proposalNumber,
 				proposal_type: proposalType,
-				meeting_number: 0,
+
+				meeting_number: meetingNumber,
 				meeting_date: meetingDate,
 				meeting_type: tipoReuniao?.toLowerCase() === 'privada' as const ? 'private' as const : defaultMeetingType,
 				meeting_notes: notas.trim(),
@@ -146,22 +152,14 @@
 				// Vote data
 				votes: votes,
 				tags: tags, // Tags will be handled separately
-				parish_id: 0, // TODO
 
-			} satisfies InitiativeCreateData;
-		}));
-		await Promise.all(Array.from(tagsSet).map(async tag => {
-			await fetch('/api/tags', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ name: tag }),
-			}).catch(err => {
-				console.error(`Erro ao criar tag "${tag}":`, err);
-			});
-		}));
-		return initiatives;
+			};
+		});
+
+		return {
+			initiatives,
+			tags: Array.from(tagsSet),
+		};
 	}
 
 	// File handling
@@ -202,7 +200,8 @@
 		try {
 			error = '';
 			const csvRows = parseCSV(csvContent);
-			parsedData = await convertCSVToInitiatives(csvRows);
+			const result = convertCSVToInitiatives(csvRows);
+			parsedData = result.initiatives;
 			showPreview = true;
 		} catch (e) {
 			error = `Erro ao processar CSV: ${e}`;
@@ -223,14 +222,34 @@
 		processingProgress = 0;
 
 		try {
+			// First, create all unique tags
+			const csvRows = parseCSV(csvContent);
+			const { tags } = convertCSVToInitiatives(csvRows);
+
+			if (tags.length > 0) {
+				await Promise.all(tags.map(async tag => {
+					await fetch('/api/tags', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({ name: tag }),
+					}).catch(err => {
+						console.error(`Erro ao criar tag "${tag}":`, err);
+					});
+				}));
+			}
+
 			// Import initiatives one by one to show progress
 			const total = parsedData.length;
 			const imported = [];
 			const failed = [];
 
 			for (let i = 0; i < parsedData.length; i++) {
-				const initiative = { ...parsedData[i] };
-				initiative.parish_id = parseInt(selectedParish);
+				const initiative: InitiativeCreateData = {
+					...parsedData[i],
+					parish_id: selectedParishId,
+				};
 
 				try {
 					const response = await fetch('/api/backoffice/initiatives', {
@@ -422,7 +441,7 @@
 							<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div>
 									<Label for="parish">Freguesia *</Label>
-									<SelectAutarchy parishes={data.parishes} bind:selectedParish={selectedParish} allEnabled={false} />
+									<SelectAutarchy parishes={data.parishes} bind:selectedParish allEnabled={false} />
 								</div>
 
 								<div>

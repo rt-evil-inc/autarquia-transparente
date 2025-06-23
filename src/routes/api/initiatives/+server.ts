@@ -3,10 +3,7 @@ import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 
 export type InitiativesResponse = {
-	initiatives: ((
-		ReturnType<typeof queries.searchInitiatives>[0] |
-		ReturnType<typeof queries.searchInitiativesWithTag>[0]
-		) & {
+	initiatives: (ReturnType<typeof queries.searchInitiatives>[0] & {
 		tags: ReturnType<typeof queries.getInitiativeTags>;
 		votes: ReturnType<typeof queries.getInitiativeVotes>;
 	})[];
@@ -28,7 +25,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const searchTerm = search ? `%${search}%` : null;
 
 	// Get all initiatives first to count total
-	const allInitiatives = tag ? queries.searchInitiativesWithTag(searchTerm, tag, parish) : queries.searchInitiatives(searchTerm, parish);
+	const allInitiatives = queries.searchInitiatives(searchTerm, parish, tag);
 
 	const totalCount = allInitiatives.length;
 	const totalPages = Math.ceil(totalCount / perPage);

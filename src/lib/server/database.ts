@@ -308,7 +308,7 @@ export const queries = {	// User functions
 	},
 
 	// Search functions
-	searchInitiatives: (search: string | null, parish_code: string | null) => {
+	searchInitiatives: (search: string | null, parish_code: string | null, tag_name?: string | null) => {
 		const baseQuery = drizzleDb.select({
 			id: initiatives.id,
 			title: initiatives.title,
@@ -320,6 +320,7 @@ export const queries = {	// User functions
 			vote_date: initiatives.vote_date,
 			created_by: initiatives.created_by,
 			created_at: initiatives.created_at,
+			meeting_date: initiatives.meeting_date,
 			updated_at: initiatives.updated_at,
 			parish_name: parishes.name,
 			parish_code: parishes.code,
@@ -344,48 +345,35 @@ export const queries = {	// User functions
 			conditions.push(eq(parishes.code, parish_code));
 		}
 
+		if (tag_name) {
+			conditions.push(eq(tags.name, tag_name));
+			// Join with tags when tag filtering is needed
+			return drizzleDb.selectDistinct({
+				id: initiatives.id,
+				title: initiatives.title,
+				description: initiatives.description,
+				content: initiatives.content,
+				parish_id: initiatives.parish_id,
+				status: initiatives.status,
+				submission_date: initiatives.submission_date,
+				vote_date: initiatives.vote_date,
+				created_by: initiatives.created_by,
+				created_at: initiatives.created_at,
+				updated_at: initiatives.updated_at,
+				parish_name: parishes.name,
+				meeting_date: initiatives.meeting_date,
+				parish_code: parishes.code,
+			})
+				.from(initiatives)
+				.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
+				.innerJoin(initiative_tags, eq(initiatives.id, initiative_tags.initiative_id))
+				.innerJoin(tags, eq(initiative_tags.tag_id, tags.id))
+				.where(and(...conditions))
+				.orderBy(desc(initiatives.created_at))
+				.all();
+		}
+
 		return baseQuery.where(and(...conditions)).orderBy(desc(initiatives.created_at)).all();
-	},
-
-	searchInitiativesWithTag: (search: string | null, tag_name: string, parish_code: string | null) => {
-		const conditions = [eq(tags.name, tag_name)];
-
-		if (search) {
-			conditions.push(
-				or(
-					like(initiatives.title, `%${search}%`),
-					like(initiatives.description, `%${search}%`),
-					like(initiatives.content, `%${search}%`),
-				)!,
-			);
-		}
-
-		if (parish_code) {
-			conditions.push(eq(parishes.code, parish_code));
-		}
-
-		return drizzleDb.selectDistinct({
-			id: initiatives.id,
-			title: initiatives.title,
-			description: initiatives.description,
-			content: initiatives.content,
-			parish_id: initiatives.parish_id,
-			status: initiatives.status,
-			submission_date: initiatives.submission_date,
-			vote_date: initiatives.vote_date,
-			created_by: initiatives.created_by,
-			created_at: initiatives.created_at,
-			updated_at: initiatives.updated_at,
-			parish_name: parishes.name,
-			parish_code: parishes.code,
-		})
-			.from(initiatives)
-			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
-			.innerJoin(initiative_tags, eq(initiatives.id, initiative_tags.initiative_id))
-			.innerJoin(tags, eq(initiative_tags.tag_id, tags.id))
-			.where(and(...conditions))
-			.orderBy(desc(initiatives.created_at))
-			.all();
 	},
 	// Tag functions
 	getAllTags: (): Tag[] => {

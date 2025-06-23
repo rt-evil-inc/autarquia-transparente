@@ -43,10 +43,10 @@ export const TAG_COLORS: TagColor[] = [
 	{ name: 'sky', label: 'Azul Céu', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', hex: '#0EA5E9', lightBg: 'bg-sky-100' },
 
 	// Neutrals
-	{ name: 'slate', label: 'Ardósia', bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200', hex: '#475569', lightBg: 'bg-slate-100' },
-	{ name: 'gray', label: 'Cinzento', bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', hex: '#4B5563', lightBg: 'bg-gray-100' },
-	{ name: 'zinc', label: 'Zinco', bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', hex: '#52525B', lightBg: 'bg-zinc-100' },
-	{ name: 'stone', label: 'Pedra', bg: 'bg-stone-50', text: 'text-stone-700', border: 'border-stone-200', hex: '#57534E', lightBg: 'bg-stone-100' },
+	// { name: 'slate', label: 'Ardósia', bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200', hex: '#475569', lightBg: 'bg-slate-100' },
+	// { name: 'gray', label: 'Cinzento', bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', hex: '#4B5563', lightBg: 'bg-gray-100' },
+	// { name: 'zinc', label: 'Zinco', bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', hex: '#52525B', lightBg: 'bg-zinc-100' },
+	// { name: 'stone', label: 'Pedra', bg: 'bg-stone-50', text: 'text-stone-700', border: 'border-stone-200', hex: '#57534E', lightBg: 'bg-stone-100' },
 ];
 
 // Utility functions
@@ -106,4 +106,9 @@ export function getNeutralTagClasses(): string {
 
 export function getDefaultTagColor(): TagColor {
 	return TAG_COLORS[0]; // Default to blue
+}
+
+export function randomColor(): TagColor {
+	const randomIndex = Math.floor(Math.random() * TAG_COLORS.length);
+	return TAG_COLORS[randomIndex];
 }

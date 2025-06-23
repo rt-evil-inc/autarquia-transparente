@@ -1,24 +1,18 @@
 <script lang="ts">
-	import SelectAutarchy from '../lib/components/SelectAutarchy.svelte';
+	import SelectAutarchy from '$lib/components/SelectAutarchy.svelte';
 
 	import { goto } from '$app/navigation';
 	import Tag from '$lib/components/Tag.svelte';
+	import InitiativeCard from './InitiativeCard.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import {
-		Card,
-		CardContent,
-		CardDescription,
-		CardHeader,
-		CardTitle,
-	} from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import * as Select from '$lib/components/ui/select';
 	import * as Pagination from '$lib/components/ui/pagination';
 	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
+	import GithubIcon from '@lucide/svelte/icons/github';
 	import { MediaQuery } from 'svelte/reactivity';
 	import branding from '$lib/config/branding.js';
-	import { calculateVotingResult } from '$lib/voting';
 	import { untrack } from 'svelte';
 
 	let { data } = $props();
@@ -68,11 +62,6 @@
 
 	function handlePageChange(page: number) {
 		performSearch(searchTerm, selectedParish, selectedTag, page);
-	}
-
-	function formatDate(dateStr: string | Date | null) {
-		if (!dateStr) return 'N/A';
-		return new Date(dateStr).toLocaleDateString('pt-PT');
 	}
 
 	function getSelectedTagName(): string {
@@ -185,68 +174,7 @@
 		<!-- Initiatives Grid -->
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 			{#each initiatives as initiative (initiative.id)}
-				<a href="/iniciativa/{initiative.id}" class="block group h-full">
-					<Card
-						class="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col"
-					>
-						<CardHeader class="flex-shrink-0">
-							<div class="flex items-start justify-between">
-								<div class="flex-1">
-									<CardTitle
-										class="text-lg leading-tight mb-2 group-hover:text-blue-600"
-									>
-										{initiative.title}
-									</CardTitle>
-									<CardDescription>
-										{initiative.parish_name}
-									</CardDescription>
-								</div>
-							</div>
-						</CardHeader>
-
-						<CardContent class="flex-1 flex flex-col">
-							{#if initiative.description}
-								<p
-									class="text-gray-600 text-sm mb-4 line-clamp-3"
-								>
-									{initiative.description}
-								</p>
-							{/if}
-
-							<!-- Tags -->
-							{#if initiative.tags && initiative.tags.length > 0}
-								<div class="flex flex-wrap gap-1 mb-4">
-									{#each initiative.tags as tag (tag.id)}
-										<Tag tag={tag} />
-									{/each}
-								</div>
-							{/if}
-
-							<!-- Meta Info -->
-							<div class="text-xs text-gray-500 space-y-1 mt-auto">
-								{#if initiative.votes && initiative.votes.length > 0}
-									{@const votingResult = calculateVotingResult(initiative.votes)}
-									<div class="flex items-center gap-2">
-										<span>Resultado:</span>
-										<span class="px-2 py-1 rounded-full text-xs font-medium {votingResult.className}">
-											{votingResult.label}
-										</span>
-									</div>
-								{/if}
-								{#if initiative.vote_date}
-									<div>
-										Votação: {formatDate(
-											initiative.vote_date,
-										)}
-									</div>
-								{/if}
-								<div>
-									Criado: {formatDate(initiative.created_at)}
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</a>
+				<InitiativeCard {initiative} />
 			{/each}
 		</div>
 
@@ -305,19 +233,14 @@
 <!-- Footer -->
 <footer class="bg-gray-50 border-t mt-16">
 	<div class="container mx-auto px-4 py-8 text-center text-gray-600">
-		<p>
-			&copy; 2025 {branding.siteName}. Plataforma de transparência
-			municipal.
-		</p>
+		<a
+			href="https://github.com/rt-evil-inc"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+		>
+			<GithubIcon class="size-5" />
+			<span>An rt-evil-inc project</span>
+		</a>
 	</div>
 </footer>
-
-<style>
-	.line-clamp-3 {
-		display: -webkit-box;
-		line-clamp: 3;
-		-webkit-line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-</style>

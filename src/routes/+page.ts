@@ -3,35 +3,9 @@ import { error } from '@sveltejs/kit';
 import type { InitiativesResponse } from './api/initiatives/+server.js';
 
 export interface InitiativeListData {
-  initiatives: Array<{
-    id: number;
-    title: string;
-    description: string;
-    category: string;
-    status: string;
-    createdAt: string;
-    parish: {
-      name: string;
-      code: string;
-    };
-    tags: Array<{
-      id: number;
-      name: string;
-      color: string;
-    }>;
-    votes: Array<{
-      id: number;
-      vote: 'favor' | 'against' | 'abstention';
-      voter_name: string;
-      notes?: string;
-    }>;
-  }>;
+  initiatives: InitiativesResponse['initiatives'];
   parishes: Parish[];
-  tags: Array<{
-    id: number;
-    name: string;
-    color: string;
-  }>;
+  tags: Tag[];
 }
 
 export const load = async ({ url, fetch }) => {

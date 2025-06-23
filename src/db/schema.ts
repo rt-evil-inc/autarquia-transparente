@@ -24,7 +24,10 @@ export const users = sqliteTable('users', {
 export const tags = sqliteTable('tags', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	name: text('name').unique().notNull(),
-	color: text('color').default('#3B82F6'),
+	/**
+	 * Color can be a hex code (e.g., "#ff0000") or a tailwind CSS color name (e.g., "red-500").
+	 */
+	color: text('color').notNull(),
 	created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
 });
 
