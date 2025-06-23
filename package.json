@@ -44,7 +44,6 @@
     "@types/bun": "^1.2.16",
     "@types/jsonwebtoken": "^9.0.10",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^11.10.0",
     "drizzle-orm": "^0.44.2",
     "jsonwebtoken": "^9.0.2"
   },
