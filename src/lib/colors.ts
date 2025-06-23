@@ -15,15 +15,10 @@ export const TAG_COLORS: TagColor[] = [
 	{ name: 'blue-dark', label: 'Azul Escuro', bg: 'bg-blue-50', text: 'text-blue-800', border: 'border-blue-300', hex: '#1D4ED8', lightBg: 'bg-blue-100' },
 	{ name: 'blue-light', label: 'Azul Claro', bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-200', hex: '#60A5FA', lightBg: 'bg-sky-50' },
 
-	// Greens
-	{ name: 'green', label: 'Verde', bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', hex: '#10B981', lightBg: 'bg-green-100' },
-	{ name: 'emerald', label: 'Esmeralda', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', hex: '#059669', lightBg: 'bg-emerald-100' },
+	// Teals and Blue-greens (avoiding pure greens)
 	{ name: 'teal', label: 'Verde Azulado', bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200', hex: '#14B8A6', lightBg: 'bg-teal-100' },
-	{ name: 'lime', label: 'Lima', bg: 'bg-lime-50', text: 'text-lime-700', border: 'border-lime-200', hex: '#65A30D', lightBg: 'bg-lime-100' },
 
-	// Reds and Pinks
-	{ name: 'red', label: 'Vermelho', bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', hex: '#EF4444', lightBg: 'bg-red-100' },
-	{ name: 'red-dark', label: 'Vermelho Escuro', bg: 'bg-red-50', text: 'text-red-800', border: 'border-red-300', hex: '#B91C1C', lightBg: 'bg-red-100' },
+	// Pinks and Roses (avoiding reds)
 	{ name: 'pink', label: 'Rosa', bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200', hex: '#EC4899', lightBg: 'bg-pink-100' },
 	{ name: 'rose', label: 'Rosa Claro', bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', hex: '#F43F5E', lightBg: 'bg-rose-100' },
 
@@ -43,10 +38,18 @@ export const TAG_COLORS: TagColor[] = [
 	{ name: 'sky', label: 'Azul Céu', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', hex: '#0EA5E9', lightBg: 'bg-sky-100' },
 
 	// Neutrals
-	// { name: 'slate', label: 'Ardósia', bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200', hex: '#475569', lightBg: 'bg-slate-100' },
-	// { name: 'gray', label: 'Cinzento', bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', hex: '#4B5563', lightBg: 'bg-gray-100' },
-	// { name: 'zinc', label: 'Zinco', bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', hex: '#52525B', lightBg: 'bg-zinc-100' },
-	// { name: 'stone', label: 'Pedra', bg: 'bg-stone-50', text: 'text-stone-700', border: 'border-stone-200', hex: '#57534E', lightBg: 'bg-stone-100' },
+	{ name: 'slate', label: 'Ardósia', bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200', hex: '#475569', lightBg: 'bg-slate-100' },
+	{ name: 'gray', label: 'Cinzento', bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200', hex: '#4B5563', lightBg: 'bg-gray-100' },
+	{ name: 'zinc', label: 'Zinco', bg: 'bg-zinc-50', text: 'text-zinc-700', border: 'border-zinc-200', hex: '#52525B', lightBg: 'bg-zinc-100' },
+	{ name: 'stone', label: 'Pedra', bg: 'bg-stone-50', text: 'text-stone-700', border: 'border-stone-200', hex: '#57534E', lightBg: 'bg-stone-100' },
+
+	// Additional vibrant colors
+	{ name: 'fuchsia', label: 'Fúcsia', bg: 'bg-fuchsia-50', text: 'text-fuchsia-700', border: 'border-fuchsia-200', hex: '#D946EF', lightBg: 'bg-fuchsia-100' },
+	{ name: 'yellow-light', label: 'Amarelo Claro', bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200', hex: '#FDE047', lightBg: 'bg-yellow-50' },
+	{ name: 'purple-light', label: 'Roxo Claro', bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200', hex: '#C084FC', lightBg: 'bg-purple-50' },
+	{ name: 'orange-light', label: 'Laranja Claro', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200', hex: '#FB923C', lightBg: 'bg-orange-50' },
+	{ name: 'teal-light', label: 'Verde Azulado Claro', bg: 'bg-teal-50', text: 'text-teal-600', border: 'border-teal-200', hex: '#5EEAD4', lightBg: 'bg-teal-50' },
+	{ name: 'cyan-light', label: 'Ciano Claro', bg: 'bg-cyan-50', text: 'text-cyan-600', border: 'border-cyan-200', hex: '#67E8F9', lightBg: 'bg-cyan-50' },
 ];
 
 // Utility functions

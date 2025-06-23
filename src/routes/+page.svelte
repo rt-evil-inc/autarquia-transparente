@@ -3,17 +3,16 @@
 
 	import { goto } from '$app/navigation';
 	import Tag from '$lib/components/Tag.svelte';
-	import InitiativeCard from './InitiativeCard.svelte';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
 	import * as Pagination from '$lib/components/ui/pagination';
+	import * as Select from '$lib/components/ui/select';
+	import branding from '$lib/config/branding.js';
 	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-	import GithubIcon from '@lucide/svelte/icons/github';
-	import { MediaQuery } from 'svelte/reactivity';
-	import branding from '$lib/config/branding.js';
 	import { untrack } from 'svelte';
+	import { MediaQuery } from 'svelte/reactivity';
+	import InitiativeCard from './InitiativeCard.svelte';
 
 	let { data } = $props();
 
@@ -229,18 +228,3 @@
 		{/if}
 	{/if}
 </main>
-
-<!-- Footer -->
-<footer class="bg-gray-50 border-t mt-16">
-	<div class="container mx-auto px-4 py-8 text-center text-gray-600">
-		<a
-			href="https://github.com/rt-evil-inc"
-			target="_blank"
-			rel="noopener noreferrer"
-			class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
-		>
-			<GithubIcon class="size-5" />
-			<span>An rt-evil-inc project</span>
-		</a>
-	</div>
-</footer>

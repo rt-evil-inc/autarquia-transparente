@@ -12,6 +12,7 @@
 	import UsersIcon from '@lucide/svelte/icons/users';
 	import branding from '$lib/config/branding';
 	import '../app.css';
+	import Github from '@lucide/svelte/icons/github';
 
 	let { children, data } = $props();
 	let mobileMenuOpen = $state(false);
@@ -265,3 +266,17 @@
 <main class="min-h-[calc(100vh-4rem)] bg-gray-50">
 	{@render children()}
 </main>
+<!-- Footer -->
+<footer class="">
+	<div class="container mx-auto px-4 py-8 text-center text-gray-600">
+		<a
+			href="https://github.com/rt-evil-inc"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+		>
+			<Github class="size-5" />
+			<span>An rt-evil-inc project</span>
+		</a>
+	</div>
+</footer>
