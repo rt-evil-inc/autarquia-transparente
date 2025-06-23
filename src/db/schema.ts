@@ -51,6 +51,8 @@ export const initiatives = sqliteTable('initiatives', {
 	meeting_type: text('meeting_type', { enum: ['public', 'private', 'extraordinary'] }), // "public", "private", "extraordinary"
 	meeting_notes: text('meeting_notes'),
 	proposal_link: text('proposal_link'), // For PDF embedding
+	// Cover image
+	cover_image: text('cover_image'), // Path to cover image file
 });
 
 export const initiative_documents = sqliteTable('initiative_documents', {

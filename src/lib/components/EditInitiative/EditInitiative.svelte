@@ -4,6 +4,7 @@
 	import type { Parish, Tag } from '$lib/server/database';
 	import type { FullInitiativeResponse } from '../../../routes/api/initiatives/[id]/+server';
 	import SelectAutarchy from '../SelectAutarchy.svelte';
+	import CoverImageManager from './CoverImageManager.svelte';
 	import DocumentManager from './DocumentManager.svelte';
 	import InitiativeBasicInfo from './InitiativeBasicInfo.svelte';
 	import InitiativeStatusInfo from './InitiativeStatusInfo.svelte';
@@ -30,6 +31,8 @@
 	let error = $state('');
 	let selectedFile: File | null = $state(null);
 	let fileInput: FileList | undefined = $state(undefined);
+	let coverImage: File | null = $state(null);
+	let coverImageInput: FileList | undefined = $state(undefined);
 
 	// Meeting fields
 	let proposalNumber = $state(initiative?.proposal_number ?? '');
@@ -67,6 +70,7 @@
 			formData.append('votes', JSON.stringify(votes));
 			if (selectedFile) formData.append('document', selectedFile);
 			if (proposalDocument) formData.append('proposalDocument', proposalDocument);
+			if (coverImage) formData.append('coverImage', coverImage);
 			// Meeting fields
 			formData.append('proposalNumber', proposalNumber || '');
 			formData.append('proposalType', proposalType || '');
@@ -89,6 +93,8 @@
 					// Clear the selected file after successful upload
 					selectedFile = null;
 					if (fileInput) fileInput = undefined;
+					coverImage = null;
+					if (coverImageInput) coverImageInput = undefined;
 				} else {
 					// For create mode, redirect to the new initiative
 					window.location.href = `/backoffice/initiatives/${responseData.id}`;
@@ -131,6 +137,9 @@
 
 					<!-- Basic Information -->
 					<InitiativeBasicInfo bind:title bind:description bind:content />
+
+					<!-- Cover Image -->
+					<CoverImageManager {initiative} {isEditMode} bind:coverImage bind:coverImageInput bind:error />
 
 					<!-- Tags -->
 					<TagManager bind:tags bind:selectedTags bind:error />

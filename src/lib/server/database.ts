@@ -175,6 +175,7 @@ export const queries = {	// User functions
 			updated_at: initiatives.updated_at,
 			parish_name: parishes.name,
 			parish_code: parishes.code,
+			cover_image: initiatives.cover_image,
 		})
 			.from(initiatives)
 			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
@@ -198,6 +199,7 @@ export const queries = {	// User functions
 			updated_at: initiatives.updated_at,
 			parish_name: parishes.name,
 			parish_code: parishes.code,
+			cover_image: initiatives.cover_image,
 		})
 			.from(initiatives)
 			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
@@ -240,6 +242,8 @@ export const queries = {	// User functions
 			meeting_date: initiative.meeting_date,
 			meeting_type: initiative.meeting_type as 'public' | 'private' | 'extraordinary' | null,
 			meeting_notes: initiative.meeting_notes,
+			// Cover image
+			cover_image: initiative.cover_image,
 		}).returning({ id: initiatives.id }).get();
 
 		if (tagIds && tagIds.length > 0) {
@@ -275,6 +279,8 @@ export const queries = {	// User functions
 			meeting_date: initiatives.meeting_date,
 			meeting_type: initiatives.meeting_type,
 			meeting_notes: initiatives.meeting_notes,
+			// Cover image
+			cover_image: initiatives.cover_image,
 		})
 			.from(initiatives)
 			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
@@ -324,6 +330,7 @@ export const queries = {	// User functions
 			updated_at: initiatives.updated_at,
 			parish_name: parishes.name,
 			parish_code: parishes.code,
+			cover_image: initiatives.cover_image,
 		})
 			.from(initiatives)
 			.innerJoin(parishes, eq(initiatives.parish_id, parishes.id));
@@ -363,6 +370,7 @@ export const queries = {	// User functions
 				parish_name: parishes.name,
 				meeting_date: initiatives.meeting_date,
 				parish_code: parishes.code,
+				cover_image: initiatives.cover_image,
 			})
 				.from(initiatives)
 				.innerJoin(parishes, eq(initiatives.parish_id, parishes.id))
@@ -453,6 +461,7 @@ export const queries = {	// User functions
 		meeting_date?: string | null,
 		meeting_type?: string | null,
 		meeting_notes?: string | null,
+		cover_image?: string | null,
 	}): void => {
 		const updateData: Partial<typeof initiatives.$inferInsert> = {
 			title: data.title,
@@ -467,6 +476,8 @@ export const queries = {	// User functions
 			meeting_date: data.meeting_date,
 			meeting_type: data.meeting_type as 'public' | 'private' | 'extraordinary' | null,
 			meeting_notes: data.meeting_notes,
+			// Cover image
+			cover_image: data.cover_image,
 		};
 
 		if (data.submission_date !== null) {

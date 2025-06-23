@@ -102,6 +102,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	let meetingType: MeetingType | null;
 	let meetingNotes: string | null;
 	let proposalFile: File | null = null;
+	let coverImageFile: File | null = null;
 	let votes: VoteData[] = [];
 
 	if (contentType.includes('multipart/form-data')) {
@@ -121,6 +122,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		tags = formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [];
 		file = formData.get('document') as File;
 		proposalFile = formData.get('proposalDocument') as File;
+		coverImageFile = formData.get('coverImage') as File;
 
 		// Meeting fields
 		proposalNumber = formData.get('proposalNumber') as string || null;
@@ -186,6 +188,32 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return queries.getTagByName(tag);
 	}).filter(tag => tag !== null);
 
+	// Handle cover image upload if provided
+	let coverImagePath: string | null = null;
+	if (coverImageFile && coverImageFile.size > 0) {
+		// Validate file type
+		if (!coverImageFile.type.startsWith('image/')) {
+			error(400, { message: 'Cover image must be an image file' });
+		}
+
+		// Ensure uploads directory exists
+		if (!existsSync(uploadsDir)) {
+			await mkdir(uploadsDir, { recursive: true });
+		}
+
+		// Generate unique filename
+		const timestamp = Date.now();
+		const fileExtension = path.extname(coverImageFile.name);
+		const filename = `cover-${timestamp}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+		const filePath = path.join(uploadsDir, filename);
+
+		// Save file
+		const arrayBuffer = await coverImageFile.arrayBuffer();
+		await writeFile(filePath, new Uint8Array(arrayBuffer));
+
+		coverImagePath = filename; // Store just the filename for the database
+	}
+
 	// Create initiative using queries
 	const initiativeId = queries.createInitiativeFull({
 		title,
@@ -201,6 +229,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		meeting_date: meetingDate,
 		meeting_type: meetingType,
 		meeting_notes: meetingNotes,
+		cover_image: coverImagePath,
 	}, dbtags.map(tag => tag.id));
 
 	// Handle file upload if provided

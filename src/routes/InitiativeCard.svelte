@@ -20,8 +20,20 @@
 
 <a href="/iniciativa/{initiative.id}" class="block group h-full">
 	<Card
-		class="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col"
+		class="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col overflow-hidden {initiative.cover_image ? 'pt-0' : ''}"
 	>
+		<!-- Cover Image -->
+		{#if initiative.cover_image}
+			<div class="relative aspect-[16/9] overflow-hidden bg-gray-100">
+				<img
+					src="/api/uploads/{initiative.cover_image}"
+					alt={initiative.title}
+					class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+					loading="lazy"
+				/>
+			</div>
+		{/if}
+
 		<CardHeader class="flex-shrink-0">
 			<div class="flex items-start justify-between">
 				<div class="flex-1">

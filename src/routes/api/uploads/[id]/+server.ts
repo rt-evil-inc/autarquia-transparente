@@ -8,7 +8,6 @@ try {
 }
 
 export const GET = async ({ params: { id } }) => {
-	console.log('Fetching file with ID:', id);
 	const filePath = `${uploadsDir}/${id}`;
 	const file = Bun.file(filePath);
 	return new Response(file);

@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { json, error } from '@sveltejs/kit';
 import { queries } from '$lib/server/database';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { uploadsDir } from '$lib/config';
@@ -65,6 +65,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	const contentType = request.headers.get('content-type') || '';
 	let title, description, content, tags, status, votes, file;
 	let proposalNumber, proposalType, meetingNumber, meetingDate, meetingType, meetingNotes, proposalFile;
+	let coverImageFile;
 
 	if (contentType.includes('multipart/form-data')) {
 		// Handle file upload
@@ -84,6 +85,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		meetingType = formData.get('meetingType') as string;
 		meetingNotes = formData.get('meetingNotes') as string;
 		proposalFile = formData.get('proposalDocument') as File;
+		coverImageFile = formData.get('coverImage') as File;
 	} else {
 		// Handle JSON data
 		const data = await request.json();
@@ -111,6 +113,44 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		submissionDate = (new Date).toISOString();
 	}
 
+	// Handle cover image upload if provided
+	let coverImagePath: string | null = existing.cover_image; // Keep existing cover image by default
+	if (coverImageFile && coverImageFile.size > 0) {
+		// Validate file type
+		if (!coverImageFile.type.startsWith('image/')) {
+			error(400, { message: 'Cover image must be an image file' });
+		}
+
+		// Ensure uploads directory exists
+		if (!existsSync(uploadsDir)) {
+			await mkdir(uploadsDir, { recursive: true });
+		}
+
+		// Generate unique filename
+		const timestamp = Date.now();
+		const fileExtension = path.extname(coverImageFile.name);
+		const filename = `cover-${timestamp}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+		const filePath = path.join(uploadsDir, filename);
+
+		// Save file
+		const arrayBuffer = await coverImageFile.arrayBuffer();
+		await writeFile(filePath, new Uint8Array(arrayBuffer));
+
+		// Delete old cover image if it exists
+		if (existing.cover_image) {
+			const oldFilePath = path.join(uploadsDir, existing.cover_image);
+			try {
+				if (existsSync(oldFilePath)) {
+					await unlink(oldFilePath);
+				}
+			} catch (error) {
+				console.error('Error deleting old cover image:', error);
+			}
+		}
+
+		coverImagePath = filename; // Store just the filename for the database
+	}
+
 	// Update initiative using queries
 	queries.updateInitiativeFull(
 		Number(id),
@@ -126,6 +166,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 			meeting_date: meetingDate || null,
 			meeting_type: meetingType || null,
 			meeting_notes: meetingNotes || null,
+			cover_image: coverImagePath,
 		},
 	);
 
