@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { Parish } from '$lib/server/database';
 	import { invalidateAll } from '$app/navigation';
-	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	import { Label } from '$lib/components/ui/label/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Label } from '$lib/components/ui/label';
+	import { Input } from '$lib/components/ui/input';
+	import { Textarea } from '$lib/components/ui/textarea';
+	import * as Card from '$lib/components/ui/card';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import * as Select from '$lib/components/ui/select';
 
 	interface Props {
 		parishes: Parish[];
@@ -18,6 +20,12 @@
 	let error = $state('');
 	let success = $state('');
 
+	// Type options for select
+	const typeOptions = [
+		{ value: 'parish', label: 'Freguesia' },
+		{ value: 'autarchy', label: 'Autarquia' },
+	];
+
 	// Form state
 	let newParish = $state({
 		name: '',
@@ -25,6 +33,11 @@
 		type: 'parish' as 'parish' | 'autarchy',
 		description: '',
 	});
+
+	// Derived content for select trigger
+	const typeTriggerContent = $derived(
+		typeOptions.find(t => t.value === newParish.type)?.label ?? 'Selecionar tipo',
+	);
 
 	// Parish to delete (for alert dialog)
 	let parishToDelete: Parish | null = $state(null);
@@ -169,27 +182,35 @@
 
 					<div class="grid gap-2">
 						<Label for="parish-type">Tipo</Label>
-						<select
-							id="parish-type"
-							bind:value={newParish.type}
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-							disabled={isLoading}
-						>
-							<option value="parish">Freguesia</option>
-							<option value="autarchy">Autarquia</option>
-						</select>
+						<Select.Root type="single" name="parishType" bind:value={newParish.type}>
+							<Select.Trigger class="w-full">
+								{typeTriggerContent}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Group>
+									{#each typeOptions as typeOption (typeOption.value)}
+										<Select.Item
+											value={typeOption.value}
+											label={typeOption.label}
+											disabled={isLoading}
+										>
+											{typeOption.label}
+										</Select.Item>
+									{/each}
+								</Select.Group>
+							</Select.Content>
+						</Select.Root>
 					</div>
 
 					<div class="grid gap-2">
 						<Label for="parish-description">Descrição</Label>
-						<textarea
+						<Textarea
 							id="parish-description"
 							bind:value={newParish.description}
 							placeholder="Descrição opcional"
-							rows="3"
-							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+							rows={3}
 							disabled={isLoading}
-						></textarea>
+						/>
 					</div>
 
 					<div class="flex justify-end space-x-3">
@@ -221,7 +242,7 @@
 			{:else}
 				<div class="space-y-3">
 					{#each parishes as parish (parish.id)}
-						<div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+						<div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
 							<div class="flex-1">
 								<div class="flex items-center space-x-3">
 									<h4 class="text-sm font-medium text-gray-900">{parish.name}</h4>
@@ -243,13 +264,13 @@
 							<AlertDialog.Root>
 								<AlertDialog.Trigger
 									class={buttonVariants({ variant: 'destructive', size: 'sm' })} disabled={isLoading}>
-									Eliminar
+									Apagar
 								</AlertDialog.Trigger>
 								<AlertDialog.Content>
 									<AlertDialog.Header>
-										<AlertDialog.Title>Eliminar Freguesia</AlertDialog.Title>
+										<AlertDialog.Title>Apagar Freguesia</AlertDialog.Title>
 										<AlertDialog.Description>
-											Tem a certeza de que pretende eliminar a freguesia "<strong>{parish.name}</strong>"? Esta ação não pode ser desfeita e pode afetar utilizadores e iniciativas associadas a esta freguesia.
+											Tem a certeza de que pretende apagar a freguesia "<strong>{parish.name}</strong>"? Esta ação não pode ser desfeita e pode afetar utilizadores e iniciativas associadas a esta freguesia.
 										</AlertDialog.Description>
 									</AlertDialog.Header>
 									<AlertDialog.Footer>
