@@ -49,7 +49,7 @@
 		event.preventDefault();
 
 		if (!newParish.name.trim() || !newParish.code.trim()) {
-			error = 'Name and code are required';
+			error = 'Nome e código são obrigatórios';
 			return;
 		}
 
@@ -67,14 +67,14 @@
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || 'Failed to create parish');
+				throw new Error(errorData.error || 'Falha ao criar freguesia');
 			}
 
-			success = 'Parish created successfully';
+			success = 'Freguesia criada com sucesso';
 			resetForm();
 			await invalidateAll();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to create parish';
+			error = err instanceof Error ? err.message : 'Falha ao criar freguesia';
 		} finally {
 			isLoading = false;
 		}
@@ -93,14 +93,14 @@
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || 'Failed to delete parish');
+				throw new Error(errorData.error || 'Falha ao eliminar freguesia');
 			}
 
-			success = 'Parish deleted successfully';
+			success = 'Freguesia eliminada com sucesso';
 			parishToDelete = null;
 			await invalidateAll();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to delete parish';
+			error = err instanceof Error ? err.message : 'Falha ao eliminar freguesia';
 		} finally {
 			isLoading = false;
 		}
@@ -110,14 +110,14 @@
 <Card.Root class="w-full h-full flex flex-col">
 	<Card.Header>
 		<div class="flex items-center justify-between">
-			<Card.Title>Parish Management</Card.Title>
+			<Card.Title>Gestão de Freguesias</Card.Title>
 			<Card.Action>
 				<Button
 					variant={showAddForm ? 'outline' : 'default'}
 					onclick={() => showAddForm = !showAddForm}
 					disabled={isLoading}
 				>
-					{showAddForm ? 'Cancel' : 'Add Parish'}
+					{showAddForm ? 'Cancelar' : 'Adicionar Freguesia'}
 				</Button>
 			</Card.Action>
 		</div>
@@ -143,24 +143,24 @@
 				<form onsubmit={handleAddParish} class="space-y-4">
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div class="grid gap-2">
-							<Label for="parish-name">Name *</Label>
+							<Label for="parish-name">Nome *</Label>
 							<Input
 								id="parish-name"
 								type="text"
 								bind:value={newParish.name}
-								placeholder="Parish name"
+								placeholder="Nome da freguesia"
 								required
 								disabled={isLoading}
 							/>
 						</div>
 
 						<div class="grid gap-2">
-							<Label for="parish-code">Code *</Label>
+							<Label for="parish-code">Código *</Label>
 							<Input
 								id="parish-code"
 								type="text"
 								bind:value={newParish.code}
-								placeholder="Parish code"
+								placeholder="Código da freguesia"
 								required
 								disabled={isLoading}
 							/>
@@ -168,24 +168,24 @@
 					</div>
 
 					<div class="grid gap-2">
-						<Label for="parish-type">Type</Label>
+						<Label for="parish-type">Tipo</Label>
 						<select
 							id="parish-type"
 							bind:value={newParish.type}
 							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
 							disabled={isLoading}
 						>
-							<option value="parish">Parish</option>
-							<option value="autarchy">Autarchy</option>
+							<option value="parish">Freguesia</option>
+							<option value="autarchy">Autarquia</option>
 						</select>
 					</div>
 
 					<div class="grid gap-2">
-						<Label for="parish-description">Description</Label>
+						<Label for="parish-description">Descrição</Label>
 						<textarea
 							id="parish-description"
 							bind:value={newParish.description}
-							placeholder="Optional description"
+							placeholder="Descrição opcional"
 							rows="3"
 							class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
 							disabled={isLoading}
@@ -199,13 +199,13 @@
 							onclick={() => resetForm()}
 							disabled={isLoading}
 						>
-							Cancel
+							Cancelar
 						</Button>
 						<Button
 							type="submit"
 							disabled={isLoading}
 						>
-							{isLoading ? 'Creating...' : 'Create Parish'}
+							{isLoading ? 'A criar...' : 'Criar Freguesia'}
 						</Button>
 					</div>
 				</form>
@@ -216,7 +216,7 @@
 		<div class="flex-1 overflow-y-auto">
 			{#if parishes.length === 0}
 				<div class="text-center py-8">
-					<p class="text-gray-500">No parishes found</p>
+					<p class="text-gray-500">Nenhuma freguesia encontrada</p>
 				</div>
 			{:else}
 				<div class="space-y-3">
@@ -236,24 +236,24 @@
 									<p class="text-sm text-gray-600 mt-1">{parish.description}</p>
 								{/if}
 								<p class="text-xs text-gray-400 mt-1">
-									Created: {new Date(parish.created_at || '').toLocaleDateString()}
+									Criado: {new Date(parish.created_at || '').toLocaleDateString()}
 								</p>
 							</div>
 
 							<AlertDialog.Root>
 								<AlertDialog.Trigger
 									class={buttonVariants({ variant: 'destructive', size: 'sm' })} disabled={isLoading}>
-									Delete
+									Eliminar
 								</AlertDialog.Trigger>
 								<AlertDialog.Content>
 									<AlertDialog.Header>
-										<AlertDialog.Title>Delete Parish</AlertDialog.Title>
+										<AlertDialog.Title>Eliminar Freguesia</AlertDialog.Title>
 										<AlertDialog.Description>
-											Are you sure you want to delete the parish "<strong>{parish.name}</strong>"? This action cannot be undone and may affect users and initiatives associated with this parish.
+											Tem a certeza de que pretende eliminar a freguesia "<strong>{parish.name}</strong>"? Esta ação não pode ser desfeita e pode afetar utilizadores e iniciativas associadas a esta freguesia.
 										</AlertDialog.Description>
 									</AlertDialog.Header>
 									<AlertDialog.Footer>
-										<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+										<AlertDialog.Cancel>Cancelar</AlertDialog.Cancel>
 										<AlertDialog.Action
 											onclick={() => {
 												parishToDelete = parish;
@@ -261,7 +261,7 @@
 											}}
 											disabled={isLoading}
 										>
-											{isLoading && parishToDelete?.id === parish.id ? 'Deleting...' : 'Delete'}
+											{isLoading && parishToDelete?.id === parish.id ? 'A eliminar...' : 'Eliminar'}
 										</AlertDialog.Action>
 									</AlertDialog.Footer>
 								</AlertDialog.Content>
