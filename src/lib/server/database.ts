@@ -159,6 +159,20 @@ export const queries = {	// User functions
 		return result || null;
 	},
 
+	createParish: (name: string, code: string, type: 'parish' | 'autarchy' = 'parish', description?: string): Parish => {
+		const result = drizzleDb.insert(parishes).values({
+			name: name.trim(),
+			code: code.trim(),
+			type,
+			description: description?.trim() || null,
+		}).returning().get();
+		return result;
+	},
+
+	deleteParish: (id: number): void => {
+		drizzleDb.delete(parishes).where(eq(parishes.id, id)).run();
+	},
+
 	// Initiative functions
 	getAllInitiatives: () => {
 		return drizzleDb.select({

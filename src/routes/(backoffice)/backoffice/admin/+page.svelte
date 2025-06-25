@@ -2,6 +2,7 @@
 	import branding from '$lib/config/branding';
 	import CreateUser from './CreateUser.svelte';
 	import UserList from './UserList.svelte';
+	import ParishManager from './ParishManager.svelte';
 
 	let { data } = $props();
 
@@ -20,12 +21,17 @@
 			</h2>
 
 			<!-- User Management Section -->
-			<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 h-96">
+			<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
 				<!-- Create New User -->
 				<CreateUser parishes={data.parishes} />
 
 				<!-- Users List -->
 				<UserList users={data.users} parishes={data.parishes} />
+			</div>
+
+			<!-- Parish Management Section -->
+			<div class="mt-6">
+				<ParishManager parishes={data.parishes} />
 			</div>
 
 		</div>
