@@ -1,38 +1,48 @@
-# sv
+# Portal Autarca
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+O Portal Autarca é uma plataforma open-source desenhada para gerir e apresentar as iniciativas e propostas de autarquias e freguesias. O objetivo é aumentar a transparência e facilitar o acesso à informação, permitindo que os cidadãos acompanhem a atividade política local.
 
-## Creating a project
+![Página Principal](docs/screenshots/screenshot-1.png)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Funcionalidades
 
-```bash
-# create a new project in the current directory
-npx sv create
+- **Visualização de Iniciativas**: Acompanhe propostas, votações e o estado de cada iniciativa.
+- **Filtros e Pesquisa**: Encontre facilmente iniciativas por autarquia, estado ou tags.
+- **Detalhes da Iniciativa**: Veja informações detalhadas, incluindo documentos, votos e datas importantes.
+- **Backoffice**: Uma área de gestão para os responsáveis de cada autarquia inserirem e atualizarem as suas iniciativas.
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Screenshots
 
-## Developing
+<table>
+  <tr>
+    <td><img src="docs/screenshots/screenshot-2.png" alt="Detalhes da Iniciativa"></td>
+    <td><img src="docs/screenshots/screenshot-3.png" alt="Backoffice"></td>
+  </tr>
+  <tr>
+    <td align="center"><i>Página de detalhes da iniciativa</i></td>
+    <td align="center"><i>Backoffice para gestão de iniciativas</i></td>
+  </tr>
+</table>
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Como Começar
 
-```bash
-npm run dev
+1. **Clone o repositório**:
+   ```bash
+   git clone https://github.com/seu-usuario/portal-autarca.git
+   cd portal-autarca
+   ```
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+2. **Instale as dependências**:
+   ```bash
+   bun install
+   ```
 
-## Building
+3. **Configure as variáveis de ambiente**:
+   - Copie o ficheiro `.env.example` para `.env` e preencha as variáveis necessárias.
 
-To create a production version of your app:
+4. **Inicie o servidor de desenvolvimento**:
+   ```bash
+   bun --bun run dev
+   ```
 
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+A aplicação estará disponível em `http://localhost:5173`.
