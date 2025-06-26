@@ -146,6 +146,16 @@ export const queries = {	// User functions
 	createUser: (email: string, password_hash: string, role: 'admin' | 'parish', parish_id?: number): void => {
 		drizzleDb.insert(users).values({ email, password_hash, role, parish_id }).run();
 	},
+
+	updateUser: (id: number, updates: Partial<Pick<User, 'email' | 'role' | 'parish_id' | 'is_active'>>): User | null => {
+		const result = drizzleDb.update(users)
+			.set({ ...updates, updated_at: (new Date).toISOString() })
+			.where(eq(users.id, id))
+			.returning()
+			.get();
+		return result || null;
+	},
+
 	// Parish functions
 	getAllParishes: (): Parish[] => {
 		return drizzleDb.select().from(parishes).orderBy(parishes.name).all();
