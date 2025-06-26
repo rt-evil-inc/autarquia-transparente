@@ -20,8 +20,10 @@ import {
 	type Vote,
 } from '../../db/schema';
 
+import { env } from '$env/dynamic/private';
+
 // Initialize database
-export const db = new Database('data/portal-autarca.db');
+export const db = new Database(env.DATABASE_URL);
 export const drizzleDb = drizzle(db);
 
 // Enable foreign keys
